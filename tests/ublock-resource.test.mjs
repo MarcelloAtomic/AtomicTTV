@@ -21,8 +21,8 @@ test('modern engine is included in the uBO variant, not legacy VAFT', () => {
 });
 
 test('source and resource reflect the same engine version and attribution', () => {
-  assert.ok(source.includes('// @version      1.0.0'));
-  assert.ok(resource.includes('// AtomicTTV 1.0.0 | uBlock Origin custom scriptlet'));
+  assert.ok(source.includes('// @version      1.0.1'));
+  assert.ok(resource.includes('// AtomicTTV 1.0.1 | uBlock Origin custom scriptlet'));
   const copyright = readFileSync('THIRD_PARTY_NOTICES.md', 'utf8');
   assert.match(copyright, /scamorza\/TwitchAdBlock/);
   assert.match(copyright, /pixeltris\/TwitchAdSolutions/);
