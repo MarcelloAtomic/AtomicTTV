@@ -27,11 +27,11 @@ jobs:
           test "$GITHUB_REF_NAME" = "v$APP_VERSION"
       - name: Package Chromium MV3 extension
         run: |
-          cd dist/AtomicTTV-Chromium-1.0.0
-          zip -qr ../AtomicTTV-Chromium-1.0.0.zip .
+          cd dist/AtomicTTV-Chromium-1.0.1
+          zip -qr ../AtomicTTV-Chromium-1.0.1.zip .
           cd ..
-          unzip -t AtomicTTV-Chromium-1.0.0.zip
+          unzip -t AtomicTTV-Chromium-1.0.1.zip
       - name: Publish release with installation package
-        run: gh release create "$GITHUB_REF_NAME" dist/AtomicTTV-Chromium-1.0.0.zip --generate-notes --title "AtomicTTV $GITHUB_REF_NAME"
+        run: gh release create "$GITHUB_REF_NAME" dist/AtomicTTV-Chromium-1.0.1.zip --generate-notes --title "AtomicTTV $GITHUB_REF_NAME"
         env:
           GH_TOKEN: ${{ github.token }}
