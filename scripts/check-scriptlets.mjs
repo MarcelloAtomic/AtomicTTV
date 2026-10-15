@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 
 for (const file of [
+  'atomicttv/atomicttv-ublock-origin.js',
   'vaft/vaft-ublock-origin.js',
   'video-swap-new/video-swap-new-ublock-origin.js',
 ]) {
