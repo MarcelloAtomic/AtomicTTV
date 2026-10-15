@@ -1,4 +1,4 @@
-name: Release
+name: Tagged release
 
 on:
   push:
@@ -9,7 +9,8 @@ permissions:
   contents: read
 
 jobs:
-  publish:
+  release:
+    name: Verify and publish distribution
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -18,9 +19,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Run checks
-        run: npm run check
-      - name: Publish tagged release
-        run: gh release create "$GITHUB_REF_NAME" --generate-notes --title "$GITHUB_REF_NAME"
+      - name: Run tests and build
+        run: npm run verify
+      - name: Verify tag matches extension version
+        run: |
+          APP_VERSION=$(node -p "require('./manifest.json').version")
+          test "$GITHUB_REF_NAME" = "v$APP_VERSION"
+      - name: Package Chromium MV3 extension
+        run: |
+          cd dist/AtomicTTV-Chromium-1.0.0
+          zip -qr ../AtomicTTV-Chromium-1.0.0.zip .
+          cd ..
+          unzip -t AtomicTTV-Chromium-1.0.0.zip
+      - name: Publish release with installation package
+        run: gh release create "$GITHUB_REF_NAME" dist/AtomicTTV-Chromium-1.0.0.zip --generate-notes --title "AtomicTTV $GITHUB_REF_NAME"
         env:
           GH_TOKEN: ${{ github.token }}
