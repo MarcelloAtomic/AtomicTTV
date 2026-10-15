@@ -4,6 +4,18 @@
 
 **Version:** 1.0.0 · **Projektstand:** Technisch installierbar und automatisiert getestet; keine unabhängige Garantie für aktuelle Werbeblockierung oder fehlerfreie Twitch-Live-Wiedergabe. Twitch kann interne Schnittstellen jederzeit ändern.
 
+## uBlock Origin (ohne Tampermonkey)
+
+Wer wie beim Originalprojekt den `userResourcesLocation`-Eintrag nutzt, kann den **modernen** AtomicTTV-Kern direkt als `twitch-videoad`-Scriptlet laden:
+
+```text
+https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv-ublock-origin.js
+```
+
+In **Meine Filter** bleibt die Regel `twitch.tv##+js(twitch-videoad)` bestehen. Ersetze in den erweiterten uBlock-Origin-Einstellungen den alten pixeltris-URL durch unseren neuen. Weitere Schritte stehen in [docs/UBLOCK.md](docs/UBLOCK.md).
+
+**Vollständiges uBlock Origin erforderlich** (nicht uBlock Origin Lite). Der ältere Fork-Pfad `vaft/vaft-ublock-origin.js` bleibt als Legacy-Ausgabe erhalten.
+
 ## Direkt installieren
 
 ### Variante A – Userscript (empfohlen)
@@ -19,7 +31,7 @@ Aus dem GitHub-Repository unter **Actions → Quality checks → aktueller erfol
 
 Alternativ den Repository-Quellcode als ZIP herunterladen und den Repository-Ordner direkt als entpackte Erweiterung laden. Die Erweiterung benötigt keine breit gefassten Zusatzberechtigungen und injiziert den Code nur auf Twitch-Seiten.
 
-**Wichtig:** Entweder das Userscript *oder* die Erweiterung nutzen, nicht beides gleichzeitig.
+**Wichtig:** Nur **eine** AtomicTTV-Variante gleichzeitig verwenden: uBO-Scriptlet, Userscript oder Erweiterung.
 
 [Ausführliche Installations- und Fehlerdiagnoseanleitung](docs/INSTALL.md)
 
