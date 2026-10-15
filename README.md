@@ -1,49 +1,69 @@
 # AtomicTTV
 
-**An experimental, independently maintained fork of [pixeltris/TwitchAdSolutions](https://github.com/pixeltris/TwitchAdSolutions).**
+**Twitch-Userscript und Chrome-/Edge-/Brave-Erweiterung (Manifest V3).** Modernisierte Weiterentwicklung des [archivierten TwitchAdSolutions-Projekts](https://github.com/pixeltris/TwitchAdSolutions) auf Basis des [TwitchAdBlock-VAFT-Nachfolgers](https://github.com/scamorza/TwitchAdBlock).
 
-> **Development status (October 2026):** The original VAFT implementation is the starting point. AtomicTTV has **not** yet been validated against current Twitch playback and advertising behaviour. Do not interpret passing unit tests as proof of working ad blocking or uninterrupted video.
+**Version:** 1.0.0 · **Projektstand:** Technisch installierbar und automatisiert getestet; keine unabhängige Garantie für aktuelle Werbeblockierung oder fehlerfreie Twitch-Live-Wiedergabe. Twitch kann interne Schnittstellen jederzeit ändern.
 
-## What is included?
+## Direkt installieren
 
-| Component | Status |
-| --- | --- |
-| [VAFT userscript](vaft/vaft.user.js) | Primary development target |
-| [VAFT uBlock Origin scriptlet](vaft/vaft-ublock-origin.js) | Legacy compatibility; shares targeted fixes |
-| [video-swap-new](video-swap-new/) | Archived upstream alternative; no new features planned yet |
-| [strip](strip/) | Upstream legacy implementation; **not recommended** |
-| [Troubleshooting](issues.md) and [alternative solutions](full-list.md) | Upstream reference documents (not yet revalidated) |
+### Variante A – Userscript (empfohlen)
 
-**Do not combine multiple Twitch-specific ad-blocking userscripts.** They can interfere with one another when hooking the same browser APIs.
+1. [Violentmonkey](https://violentmonkey.github.io/) oder [Tampermonkey](https://www.tampermonkey.net/) installieren.
+2. **[AtomicTTV v1.0.0 installieren](https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv.user.js)** – der Userscript-Manager zeigt die Installationsabfrage.
+3. Andere Twitch-spezifische Blocker deaktivieren, Twitch neu laden.
+4. Optional in der Browser-Konsole mit `window.atomicTTV.status()` prüfen.
 
-## Installation (experimental)
+### Variante B – Chrome, Edge oder Brave als Erweiterung
 
-After a tested release is published, review the code and install the VAFT userscript using a userscript manager such as Tampermonkey or Violentmonkey:
+Aus dem GitHub-Repository unter **Actions → Quality checks → aktueller erfolgreicher Lauf → Artifacts** das Paket **AtomicTTV-Chromium-1.0.0** herunterladen (GitHub-Login kann notwendig sein). Das ZIP enthält ein weiteres ZIP mit dem installierbaren Erweiterungsordner; den inneren Inhalt entpacken. Dann im Browser `chrome://extensions` bzw. `edge://extensions` öffnen, Entwicklermodus aktivieren, **Entpackte Erweiterung laden** auswählen und den Ordner mit `manifest.json` laden.
 
-[Install AtomicTTV VAFT](https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/vaft/vaft.user.js)
+Alternativ den Repository-Quellcode als ZIP herunterladen und den Repository-Ordner direkt als entpackte Erweiterung laden. Die Erweiterung benötigt keine breit gefassten Zusatzberechtigungen und injiziert den Code nur auf Twitch-Seiten.
 
-The userscript's `@updateURL` points to this fork's `master` branch. For reproducible installations, use a commit-specific permalink and update manually instead. **Until this development branch is merged, the link above still serves the unmodified upstream script.**
+**Wichtig:** Entweder das Userscript *oder* die Erweiterung nutzen, nicht beides gleichzeitig.
 
-For Chromium-based browsers, user scripts may need to be explicitly allowed in the userscript manager's extension settings.
+[Ausführliche Installations- und Fehlerdiagnoseanleitung](docs/INSTALL.md)
 
-## Development
+## Was AtomicTTV macht
 
-Requires Node.js 20 or later. No runtime dependencies are required by the test suite.
+- Erkennt in HLS-Playlists eingebettete Werbeabschnitte und versucht, deren Lücken mit einem anderen Stream auszugleichen.
+- Verwendet einen sendungsweiten **Live-Sequence-Ledger**: Streams verschiedener Sitzungen werden nach Content-Segmenten statt nur nach sessionabhängigen Media-Sequences synchronisiert.
+- Prüft Fallback-Player-Typen in Reihenfolge: `mobile_feed`, `popout`, `autoplay`.
+- Unterstützt bei verfügbaren Twitch-Renditions auch höher aufgelöste Streams (AVC/HEVC); nicht jede Fallback-Variante hat dieselbe Qualität.
+- Hat Wiederherstellungsroutinen für hängende Player, Dekodierfehler und störende Hintergrundtab-Effekte.
+- Verfügt über Client-seitige Display-Ad-Behandlung und Diagnosefunktionen.
 
-```bash
-npm run check
+**Grenzen:** Es können weiterhin Ladepausen, schwarze Bilder oder Qualitätswechsel auftreten. Verfügbare Streamqualität und Wirksamkeit sind von Twitch abhängig; keine mobile App-Unterstützung. Bei abweichenden Twitch-Experimenten ist ein Hotfix möglichweise nötig.
+
+## Diagnose
+
+Öffne Twitch, drücke `F12` und teste:
+
+```js
+window.atomicTTV.status()            // Installationszustand und Player-Erkennung
+window.atomicTTV.setLogLevel('debug') // Erweiterte Diagnosen
+window.atomicTTV.overlayBuffer()      // Beobachtungen zu Overlay-Werbung
+window.atomicTTV.banner({ShowBanner:false}) // Statusmarkierung ausblenden
 ```
 
-This runs JavaScript syntax checks for the browser userscripts and uBlock scriptlets, plus Node.js unit tests. The tests currently cover **selected playlist-transform behaviour and installation metadata**. They do not simulate a live Twitch session.
+**Keine** Cookies, Authentifizierungsheader, signierten Stream-URLs oder Playback-Tokens in Issues hochladen.
 
-See [docs/ROADMAP.md](docs/ROADMAP.md) for the implementation and validation plan and [CONTRIBUTING.md](CONTRIBUTING.md) for reproduction/reporting guidance.
+## Entwicklung und Tests
 
-## Attribution and license
+Node.js **20.11+**:
 
-AtomicTTV is derived from **[pixeltris/TwitchAdSolutions](https://github.com/pixeltris/TwitchAdSolutions)** and retains the original [MIT license](LICENSE) and contributor attribution. Some underlying ideas and code have additional historical attribution in the original scripts.
+```bash
+npm run check              # Syntax- und HLS-Regressionsprüfungen
+npm run package:extension  # lokale Chromium-Erweiterung erzeugen
+npm run verify             # alles zusammen
+```
 
-This repository is not affiliated with or endorsed by Twitch. Third-party ad-blocking may breach Twitch's Terms of Service; evaluate the technical and account risks yourself. Subscriptions and Twitch Turbo are official alternatives.
+Die Tests führen die Originalfunktionen aus dem eingebetteten Stream-Worker mit synthetischen HLS-Playlists aus. Zusätzlich werden Installationsmetadaten, Legacy-VAFT-Bestand und die Erweiterung geprüft. Diese Tests ersetzen **keine** Live-Validierung von Twitch-Streams mit Werbeunterbrechungen.
 
-## Kurzfassung auf Deutsch
+## Code und Herkunft
 
-AtomicTTV ist unser Entwicklungs-Fork des am 5. März 2026 archivierten TwitchAdSolutions-Projekts. Wir konzentrieren uns zuerst auf **VAFT, Fehlerdiagnose, Stream-Stabilität und reproduzierbare Tests**. Ein erfolgreicher Testlauf bedeutet noch **nicht**, dass die Werbeblockierung auf Twitch aktuell zuverlässig funktioniert.
+- Hauptprodukt: [atomicttv/atomicttv.user.js](atomicttv/atomicttv.user.js)
+- Erweiterungsmanifest: [manifest.json](manifest.json)
+- Historische, **nicht als aktuelle Primärlösung empfohlene** Varianten: [vaft](vaft/), [video-swap-new](video-swap-new/), [strip](strip/)
+- [Roadmap](docs/ROADMAP.md) · [Mitmachen](CONTRIBUTING.md) · [Drittanbieter-Credits](THIRD_PARTY_NOTICES.md)
+
+**MIT-Lizenz.** Copyright und Autorenangaben beider Vorgängerprojekte bleiben erhalten. Twitch unterstützt dieses Projekt nicht; der Einsatz kann gegen Twitch-Nutzungsbedingungen verstoßen. Alternativ bietet [Twitch Turbo](https://www.twitch.tv/turbo) einen offiziellen Weg ohne Werbung.
