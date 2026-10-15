@@ -1,24 +1,26 @@
 # AtomicTTV installieren
 
-**Empfohlen für uBlock-Nutzer:** [Einfache uBlock-Origin-Anleitung](UBLOCK.md). Du brauchst dafür **kein Tampermonkey**.
+**Empfohlen: [Brave + uBlock Origin in vier Schritten](UBLOCK.md).** Kein Tampermonkey erforderlich.
 
-## Andere Installationsmöglichkeiten
+## Alternative 1: AtomicTTV als eigene Brave-Erweiterung
 
-### Chrome, Edge oder Brave: eigene Erweiterung
+Falls du uBlock Origin nicht nutzen möchtest:
 
-1. Öffne einen [erfolgreichen GitHub-Actions-Lauf](https://github.com/MarcelloAtomic/AtomicTTV/actions/workflows/checks.yml) und lade unter **Artifacts** `AtomicTTV-Chromium-1.0.0` herunter.
-2. Entpacke das heruntergeladene Archiv und das enthaltene Erweiterungs-ZIP.
-3. Öffne `chrome://extensions` oder `edge://extensions`, aktiviere den **Entwicklermodus** und wähle **Entpackte Erweiterung laden**.
-4. Wähle den entpackten Ordner mit `manifest.json`. Lade Twitch neu.
+1. Öffne die [GitHub-Actions-Übersicht](https://github.com/MarcelloAtomic/AtomicTTV/actions/workflows/checks.yml) und wähle einen erfolgreichen Lauf.
+2. Lade unter **Artifacts** `AtomicTTV-Chromium-1.0.0` herunter und entpacke das Archiv sowie die darin enthaltene ZIP-Datei.
+3. Öffne `brave://extensions`, aktiviere den Entwicklermodus und klicke auf **Entpackte Erweiterung laden**.
+4. Wähle den Ordner aus, der die Datei `manifest.json` enthält. Lade Twitch neu.
 
-### Optional: Userscript
+Diese Variante funktioniert unabhängig von uBlock Origin. Es ist keine zusätzliche Userscript-Verwaltung nötig.
 
-Installiere [AtomicTTV als Userscript](https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv.user.js) über Tampermonkey oder Violentmonkey. Das ist **nicht** erforderlich, wenn du die uBlock-Methode nutzt.
+## Alternative 2: Userscript
+
+Die [AtomicTTV-Userscript-Datei](https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv.user.js) kann mit einem geeigneten Userscript-Manager installiert werden. Für die oben beschriebene Brave/uBlock-Methode ist das **nicht nötig**.
 
 ## Wichtig
 
-Nutze **nur eine** der drei Varianten: uBlock-Scriptlet, Browser-Erweiterung oder Userscript. Andere Twitch-spezifische Adblocker können zu Konflikten führen.
+Bitte **nur eine Installationsart** gleichzeitig verwenden: uBlock-Scriptlet, eigene Erweiterung oder Userscript. Andere Twitch-spezifische Blocker können Konflikte auslösen.
 
-AtomicTTV ist experimentell. Echtzeit-Wirksamkeit und unterbrechungsfreie Twitch-Wiedergabe sind nicht garantiert. Bei Problemen findest du [Hilfe in der uBlock-Anleitung](UBLOCK.md). Gib in Fehlerberichten niemals Cookies, Authentifizierungsdaten oder signierte Stream-URLs weiter.
+AtomicTTV ist experimentell; die Werbeblockierung und unterbrechungsfreie Wiedergabe sind nicht garantiert. Für die Fehlersuche siehe [Brave-Anleitung](UBLOCK.md). Teile niemals Account-Tokens, Cookies oder vollständige signierte Stream-URLs.
 
-Quellcode und Lizenz: [AtomicTTV](https://github.com/MarcelloAtomic/AtomicTTV) · [MIT](../LICENSE) · [Credits](../THIRD_PARTY_NOTICES.md)
+[Zurück zur GitHub-Startseite](../README.md) · [MIT-Lizenz](../LICENSE) · [Credits](../THIRD_PARTY_NOTICES.md)
