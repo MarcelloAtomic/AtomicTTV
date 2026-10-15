@@ -5,14 +5,14 @@ AtomicTTV is currently an experimental fork. The objective is reliable player be
 ## Local checks
 
 1. Install Node.js 20 or later.
-2. From the repository root, run \`npm run check\`.
+2. From the repository root, run `npm run check`.
 3. Avoid adding dependencies for simple unit tests.
 4. Preserve the MIT license and upstream attribution.
 
 ## Change policy
 
 - Make changes on a branch and submit a pull request.
-- Keep diffs focused; changes to \`vaft.user.js\` and the uBO version should be deliberately synchronized where their runtime logic is shared.
+- Keep diffs focused; changes to `vaft.user.js` and the uBO version should be deliberately synchronized where their runtime logic is shared.
 - Add a regression test for each reproducible player/playlist bug.
 - Do not introduce arbitrary remote code execution, browser-wide interception, or logging of sensitive auth tokens.
 - Do not claim current Twitch compatibility without documenting browser, script manager, UTC date, player mode and repeatable manual observations.
@@ -27,4 +27,4 @@ AtomicTTV is currently an experimental fork. The objective is reliable player be
 
 ## Release policy
 
-Merging a pull request does not publish a release. Releases are created from explicitly pushed \`v*\` tags only after checks pass.
+Merging a pull request does not publish a release. Releases are created from explicitly pushed `v*` tags only after checks pass.
