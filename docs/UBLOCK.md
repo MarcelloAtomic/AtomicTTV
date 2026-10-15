@@ -1,30 +1,46 @@
-# AtomicTTV für uBlock Origin
+# AtomicTTV mit uBlock Origin installieren
 
-**Direkt einbindbar – kein Tampermonkey/Violentmonkey erforderlich.**
+**Kein Tampermonkey erforderlich.** Du brauchst das vollständige **uBlock Origin**, nicht uBlock Origin Lite. Diese Methode eignet sich beispielsweise für Firefox.
 
-Die moderne AtomicTTV-Engine wird in eine uBlock-Origin-Ressource mit dem Namen `twitch-videoad.js` verpackt. Diese Resource kann wie bei pixeltris' Original via `userResourcesLocation` geladen werden.
+## Schritt 1 – URL eintragen
 
-## Script-URL (Master, aktueller Quellstand)
+1. Öffne das **uBlock-Origin-Dashboard** und gehe auf **Einstellungen**.
+2. Aktiviere **„Ich bin ein erfahrener Anwender“**.
+3. Klicke auf das **Zahnrad** neben dieser Einstellung.
+4. Suche die Zeile `userResourcesLocation` und ersetze ihren bisherigen Wert mit der folgenden URL:
 
 ```text
 https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv-ublock-origin.js
 ```
 
-## Installation
+Die vollständige Zeile soll dann so aussehen:
 
-1. **uBlock Origin → Dashboard → Meine Filter:** `twitch.tv##+js(twitch-videoad)` eingeben und Änderungen übernehmen.
-2. **Einstellungen:** `Ich bin ein erfahrener Anwender` aktivieren, dann Zahnrad öffnen.
-3. In den erweiterten Einstellungen `userResourcesLocation` von `unset` auf `userResourcesLocation https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv-ublock-origin.js` setzen. Den bisherigen `pixeltris`-URL durch unseren ersetzen; nicht beide Scriptlets zugleich konfigurieren.
-4. Speichern, uBlock Origin deaktivieren/aktivieren oder Browser neu starten, dann Twitch neu laden.
+```text
+userResourcesLocation https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv-ublock-origin.js
+```
 
-Andere, unabhängige Custom-Ressourcen dürfen mit Leerzeichen getrennt zusätzlich aufgeführt werden. Es darf aber keine zweite Ressource mit dem Namen `twitch-videoad` aktiv sein.
+Entferne dabei die alte `pixeltris/TwitchAdSolutions`-URL, damit nicht zwei Versionen desselben Scriptlets eingebunden werden. Speichere die Änderung.
 
-## Welche Version von uBlock?
+## Schritt 2 – Filter eintragen
 
-Erforderlich ist **uBlock Origin (vollständige Version)**. **uBlock Origin Lite** kann keine externen Scriptlets über `userResourcesLocation` laden. Besonders aktuelle Chrome-Versionen unterstützen klassische Manifest-V2-Erweiterungen nicht mehr; nutze dann einen Browser mit vollständigem uBlock Origin oder die separate AtomicTTV-Manifest-V3-Erweiterung.
+1. Öffne in uBlock Origin den Reiter **Meine Filter**.
+2. Füge folgende Zeile ein (falls sie noch nicht vorhanden ist):
 
-## Pflege und Sicherheit
+```text
+twitch.tv##+js(twitch-videoad)
+```
 
-Der Scriptlet-Code kommt aus `atomicttv/atomicttv.user.js`; `npm run build:ublock` regeneriert ihn deterministisch, und `npm run check` erkennt Abweichungen. Die Raw-URL auf `master` erhält bei regulärer Ressourcenaktualisierung neue Versionen. Für unveränderliche Builds den URL-Pfad `master` durch einen vollständigen Commit-Hash ersetzen und manuell aktualisieren. Fremde Scriptlet-URLs führen ausführbaren Code aus: Quelle vor Änderungen prüfen.
+3. Klicke auf **Änderungen übernehmen**.
 
-**Status:** automatisierte Tests für Syntax/Erzeugung; Live-Funktionstests mit aktuellem Twitch und uBlock Origin sind noch offen. Werbeblockierung kann durch Änderungen an Twitch jederzeit ausfallen. Keine Garantie für störungsfreie Wiedergabe. 
+## Schritt 3 – Twitch neu laden
+
+Öffne einen Twitch-Stream oder lade eine bereits geöffnete Twitch-Seite neu. Fertig.
+
+## Falls es nicht funktioniert
+
+- Prüfe, ob du **uBlock Origin** statt **uBlock Origin Lite** verwendest. Bei aktuellen Chrome-Versionen wird das klassische uBlock Origin nicht mehr regulär unterstützt.
+- Kontrolliere, ob **beide Einträge** vorhanden sind: die URL unter `userResourcesLocation` und der Filter unter **Meine Filter**.
+- Entferne ältere TwitchAdSolutions-Scriptlets und deaktiviere andere Twitch-spezifische Werbeblocker, die dazwischenfunken können.
+- Bei einem schwarzen Bild oder dauerndem Laden: Deaktiviere zunächst den Filter, lade Twitch neu und [melde den Fehler auf GitHub](https://github.com/MarcelloAtomic/AtomicTTV/issues). Teile keine Cookies, Account-Tokens oder signierten Stream-URLs.
+
+**Hinweis:** Der Code ist automatisiert auf Syntax und ausgewählte Streaming-Funktionen geprüft. Die zuverlässige Werbeblockierung auf dem aktuellen Twitch-Player ist nicht garantiert.

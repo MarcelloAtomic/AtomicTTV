@@ -1,38 +1,24 @@
-# Installation von AtomicTTV
+# AtomicTTV installieren
 
-**Version:** 1.0.0 · **Status:** experimentell, automatisierte Prüfungen erfolgreich; noch keine unabhängige Live-Validierung mit Twitch im Oktober 2026.
+**Empfohlen für uBlock-Nutzer:** [Einfache uBlock-Origin-Anleitung](UBLOCK.md). Du brauchst dafür **kein Tampermonkey**.
 
-## Variante A: Userscript (empfohlen)
+## Andere Installationsmöglichkeiten
 
-1. Installiere **Tampermonkey** oder **Violentmonkey**. Erlaube bei Chrome/Edge ggf. Userscripts in den Erweiterungsdetails (Browser-Einstellungen oder Entwicklermodus, je nach Version).
-2. Öffne direkt [AtomicTTV Userscript](https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv.user.js) und installiere es über den Userscript-Manager.
-3. Entferne oder deaktiviere **alle anderen Twitch-spezifischen Blocker-Skripte**, insbesondere VAFT, TwitchAdSolutions und TwitchAdBlock. Normale zusätzliche Erweiterungen können ebenfalls kollidieren.
-4. Öffne einen Live-Stream auf https://www.twitch.tv. Öffne F12 → Konsole und gib `window.atomicTTV.status()` ein. Das Script zeigt einen Status mit den aktiven Hooks und der Player-Erkennung.
-5. Diagnose: `window.atomicTTV.setLogLevel('debug')`. Probleme ohne Account-Tokens, Cookies oder Streamsignaturen melden.
+### Chrome, Edge oder Brave: eigene Erweiterung
 
-## Variante B: Chrome / Edge / Brave als Erweiterung
+1. Öffne einen [erfolgreichen GitHub-Actions-Lauf](https://github.com/MarcelloAtomic/AtomicTTV/actions/workflows/checks.yml) und lade unter **Artifacts** `AtomicTTV-Chromium-1.0.0` herunter.
+2. Entpacke das heruntergeladene Archiv und das enthaltene Erweiterungs-ZIP.
+3. Öffne `chrome://extensions` oder `edge://extensions`, aktiviere den **Entwicklermodus** und wähle **Entpackte Erweiterung laden**.
+4. Wähle den entpackten Ordner mit `manifest.json`. Lade Twitch neu.
 
-1. Hole dir den Quellcode des Repositories (GitHub → Code → Download ZIP) oder ein späteres Release-ZIP, und entpacke ihn.
-2. Wenn du den Repository-Quellcode verwendest: Öffne `chrome://extensions` bzw. `edge://extensions`, aktiviere **Entwicklermodus**, klicke **Entpackte Erweiterung laden**, und wähle den Repository-Ordner mit `manifest.json` aus.
-3. Für das schlanke Erweiterungspaket: Node.js 20+ installieren, im Projekt `npm run package:extension` ausführen; anschließend den generierten Ordner `dist/AtomicTTV-Chromium-1.0.0` laden.
-4. Stelle sicher, dass weder Variante A noch ältere Twitch-Blocker parallel laufen. Ein gleichzeitiger Betrieb kann den Player beschädigen.
-5. Der Erweiterungskern ist derselbe wie bei Variante A. Updates für eine entpackte Erweiterung müssen manuell eingespielt werden.
+### Optional: Userscript
 
-## Was du erwarten kannst
+Installiere [AtomicTTV als Userscript](https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv.user.js) über Tampermonkey oder Violentmonkey. Das ist **nicht** erforderlich, wenn du die uBlock-Methode nutzt.
 
-- Nach einem Twitch-Update können einzelne Methoden jederzeit versagen. Gelegentliche Qualitätswechsel, Buffering oder schwarze Bilder lassen sich nicht garantiefrei ausschließen.
-- Keine Unterstützung für die mobile Twitch-App. Für Firefox zunächst die Userscript-Variante verwenden.
-- Twitch Turbo ist der offizielle werbefreie Weg.
-- Diese Software ist nicht offiziell von Twitch und kann gegen dessen Nutzungsbedingungen verstoßen.
+## Wichtig
 
-## Fehlerdiagnose
+Nutze **nur eine** der drei Varianten: uBlock-Scriptlet, Browser-Erweiterung oder Userscript. Andere Twitch-spezifische Adblocker können zu Konflikten führen.
 
-```js
-window.atomicTTV.status()
-window.atomicTTV.setLogLevel('debug')
-window.atomicTTV.overlayBuffer()
-```
+AtomicTTV ist experimentell. Echtzeit-Wirksamkeit und unterbrechungsfreie Twitch-Wiedergabe sind nicht garantiert. Bei Problemen findest du [Hilfe in der uBlock-Anleitung](UBLOCK.md). Gib in Fehlerberichten niemals Cookies, Authentifizierungsdaten oder signierte Stream-URLs weiter.
 
-Wenn `window.atomicTTV` nicht existiert: Prüfe Installation, Berechtigungen für Twitch, Seitenneustart und Konflikte mit anderen Userscripts. Wenn es existiert, aber kein Video läuft: Browser, Version, Codec/Qualität, Zeitpunkt des Problems, **bereinigte** Konsolenlogs und eine genaue Reproduktionsfolge notieren.
-
-**Nie** Authorization-Header, Cookies, Playback-Token, vollständige signierte m3u8-URLs oder private Kanalinformationen veröffentlichen.
+Quellcode und Lizenz: [AtomicTTV](https://github.com/MarcelloAtomic/AtomicTTV) · [MIT](../LICENSE) · [Credits](../THIRD_PARTY_NOTICES.md)
