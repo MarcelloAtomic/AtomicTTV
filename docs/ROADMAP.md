@@ -14,6 +14,13 @@
 - [x] Tag-gated release workflow with mandatory tests.
 - [x] German installation, debugging and privacy documentation.
 
+## Display ads (AtomicTTV 1.0.1)
+
+- [x] Repeat bounded ad-manager discovery at low frequency on long-lived Twitch sessions, even after initial failure or initial success.
+- [x] Report recovery count and last healthy check in diagnostics.
+- [x] Keep full uBlock Origin scriptlet synchronized with this new worker engine.
+- [ ] Validate above-chat video ads in Brave/uBlock Origin during a real Twitch session.
+
 ## Functional testing – NOT YET VERIFIED
 
 These require interactive playback and cannot be certified by GitHub CI:

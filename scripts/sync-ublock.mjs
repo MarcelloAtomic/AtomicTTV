@@ -11,9 +11,11 @@ if (!source.startsWith('// ==UserScript==') || !source.includes(marker)) {
   throw new Error('AtomicTTV userscript metadata header not found.');
 }
 const payload = source.slice(source.indexOf(marker) + marker.length);
+const version = source.match(/^\/\/ @version\s+([0-9]+\.[0-9]+\.[0-9]+)$/m)?.[1];
+if (!version) { throw new Error('AtomicTTV semver not found.'); }
 const header = [
   'twitch-videoad.js text/javascript',
-  '// AtomicTTV 1.0.0 | uBlock Origin custom scriptlet',
+  `// AtomicTTV ${version} | uBlock Origin custom scriptlet`,
   '// Source: https://github.com/MarcelloAtomic/AtomicTTV/blob/master/atomicttv/atomicttv.user.js',
   '// Based on MIT licensed TwitchAdSolutions and scamorza/TwitchAdBlock; see THIRD_PARTY_NOTICES.md',
   '// No remote Javascript loaded at runtime. Requires uBlock Origin userResourcesLocation.',

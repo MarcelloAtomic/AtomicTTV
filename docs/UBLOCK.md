@@ -47,4 +47,24 @@ Lade `https://www.twitch.tv` neu. Fertig!
 
 Die Scriptlet-Methode benötigt das **vollständige uBlock Origin**. Brave Shields allein kann diese externe `userResourcesLocation`-Ressource nicht übernehmen.
 
+## Video-Werbung über dem Chat
+
+Falls ein kurzes Werbevideo **oberhalb des Chats** erscheint, obwohl der Stream selbst werbefrei bleibt:
+
+1. Aktualisiere die AtomicTTV-Ressource in uBlock Origin: **Dashboard → Filterlisten → Alle Caches leeren → Jetzt aktualisieren** (die Schaltflächenbezeichnungen können abweichen).
+2. Starte Brave neu und lade Twitch neu.
+3. Wenn die Anzeige erneut erscheint, drücke **F12 → Konsole** und gib ein:
+
+```js
+window.atomicTTV?.status()?.layers
+```
+
+- `undefined`: Das Scriptlet wurde wahrscheinlich nicht in der Seite ausgeführt – URL und Filtereintrag überprüfen.
+- `adManagerDeclined: false`: Die Gegenmaßnahme für Display-Ads hat Twitchs Werbemanager noch nicht erfolgreich erreicht.
+- `adManagerDeclined: true`: Die Gegenmaßnahme meldet sich als aktiv; die Anzeige könnte von einer neuen Werberoutine stammen. Für die Fehlersuche helfen `adManagerAttempts`, `adManagerRecoveries` und eine Beschreibung der Anzeige.
+
+Bitte **keine Cookies, Header, Playback-Tokens oder vollständigen signierten Stream-URLs** veröffentlichen.
+
+**Version 1.0.1:** AtomicTTV prüft den Display-Ad-Manager auch während längerer Twitch-Sitzungen erneut. Das verbessert die Wiederherstellung, garantiert aber keine vollständige Werbeblockierung.
+
 **Status:** Der Code wird automatisiert geprüft. Erfolgreiches Werbeblockieren im aktuellen Twitch-Player ist nicht garantiert.
