@@ -1,0 +1,14 @@
+{
+  "name": "atomicttv",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Development tooling for the AtomicTTV TwitchAdSolutions fork",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check vaft/vaft.user.js && node --check video-swap-new/video-swap-new.user.js && node --check strip/strip.user.js && node scripts/check-scriptlets.mjs && npm test"
+  }
+}
