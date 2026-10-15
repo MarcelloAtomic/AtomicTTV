@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AtomicTTV
 // @namespace    https://github.com/MarcelloAtomic/AtomicTTV
-// @version      1.0.0
+// @version      1.0.1
 // @description  AtomicTTV: experimental Twitch stream ad filtering with playback recovery
 // @updateURL    https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv.user.js
 // @downloadURL  https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv.user.js
@@ -12,7 +12,7 @@
 // @grant        none
 // ==/UserScript==
 
-// AtomicTTV 1.0.0 - based on scamorza/TwitchAdBlock 2.2.3 (upstream SHA a1453021869b43870e30fac4c384d09b60bef435)
+// AtomicTTV 1.0.1 - based on scamorza/TwitchAdBlock 2.2.3 (upstream SHA a1453021869b43870e30fac4c384d09b60bef435)
 // Original algorithm and historical contributions: pixeltris/TwitchAdSolutions (MIT).
 // See LICENSE and THIRD_PARTY_NOTICES.md. This script is not endorsed by Twitch.
 
@@ -130,7 +130,7 @@
     };
 
     const LEVELS = { debug: 10, info: 20, warn: 30, off: 99 };
-    const VERSION = (typeof GM_info !== 'undefined' && GM_info?.script?.version) || '1.0.0';
+    const VERSION = (typeof GM_info !== 'undefined' && GM_info?.script?.version) || '1.0.1';
     const seenOnce = new Map();
 
     function log(level, message) {
@@ -1231,7 +1231,11 @@
     // 500ms apart. The bundle defining the manager can take ~20s to arrive on a cold cache, so the
     // budget is two minutes; shorter fails silently on exactly the slow loads it exists for.
     const AD_DECLINE_ATTEMPTS = 240;
-    const AdManager = { applied: false, attempts: 0, reason: null, moduleId: null };
+    // Once the fast startup probe ends, check occasionally for a newly loaded or replaced
+    // ad manager. Twitch can recreate it during single-page navigation or a bundle refresh.
+    const AD_DECLINE_RECHECK_MS = 30000;
+    const AdManager = { applied: false, attempts: 0, reason: null, moduleId: null,
+                        recoveries: 0, lastHealthyAt: null };
 
     function webpackRequire() {
         const key = Object.keys(window).find((k) => /^webpackChunk/i.test(k));
@@ -1303,7 +1307,8 @@
             // the reason is attributable.
             AdManager.applied = true;
             AdManager.reason = String(found.manager.declineReason);
-            log('info', 'client-side ad manager was already declined by Twitch (' + AdManager.reason + ')');
+            logOnce('ad-manager-already-declined', 'info',
+                'client-side ad manager was already declined (' + AdManager.reason + ')');
             return true;
         }
         // {sendEvent:false} is their own switch for not reporting the decline, so this costs no
@@ -1316,7 +1321,7 @@
             log('warn', 'ad manager found at ' + AdManager.moduleId + ' but decline did not take');
             return false;
         }
-        log('info', 'client-side ad manager declined at ' + AdManager.moduleId
+        logOnce('ad-manager-declined', 'info', 'client-side ad manager declined at ' + AdManager.moduleId
             + ' (' + AdManager.reason + ') -- display ads will not be requested');
         return true;
     }
@@ -1325,25 +1330,39 @@
         if (!Config.DeclineClientSideAds) {
             return;
         }
-        // Applying before Twitch calls startProcessingRequests() is the point: the queue checks
-        // declineReason when it drains, so the first request of the session never leaves either.
+        // A slow-loading bundle gets a fast probe for two minutes. After a success OR the
+        // initial budget expires, keep a cheap 30s recheck: Twitch may replace the ad manager
+        // while browsing channels without a full page reload, or load a different bundle late.
+        // The old one-shot probe stopped forever, leaving display ads unprotected for long tabs.
         (function attempt() {
             AdManager.attempts++;
+            const wasApplied = AdManager.applied;
             let done = false;
             try {
                 done = declineClientSideAds();
             } catch (err) {
                 log('debug', 'ad manager lookup failed: ' + (err?.message || err));
             }
+            AdManager.applied = done;
             if (done) {
-                return;
+                AdManager.lastHealthyAt = Date.now();
+                if (!wasApplied && AdManager.attempts > 1) {
+                    AdManager.recoveries++;
+                    log('info', 'client-side ad manager protection restored');
+                }
+            } else if (wasApplied) {
+                // Do not report a previously found manager as protected after it disappears.
+                AdManager.reason = null;
+                AdManager.moduleId = null;
+                log('warn', 'client-side ad manager protection lost -- retrying');
             }
-            if (AdManager.attempts >= AD_DECLINE_ATTEMPTS) {
-                log('warn', 'client-side ad manager not found after ' + AdManager.attempts
-                    + ' attempts -- display ads are NOT blocked');
-                return;
+            if (!done && AdManager.attempts === AD_DECLINE_ATTEMPTS) {
+                log('warn', 'client-side ad manager not found after ' + AdManager.attempts +
+                    ' attempts -- display ads may appear; continuing checks every 30s');
             }
-            setTimeout(attempt, 500);
+            const delay = done || AdManager.attempts >= AD_DECLINE_ATTEMPTS
+                ? AD_DECLINE_RECHECK_MS : 500;
+            setTimeout(attempt, delay);
         })();
     }
 
@@ -2858,6 +2877,8 @@ installFetchHook();
                     adManagerReason: AdManager.reason,
                     adManagerModule: AdManager.moduleId,
                     adManagerAttempts: AdManager.attempts,
+                    adManagerRecoveries: AdManager.recoveries,
+                    adManagerLastHealthyAt: AdManager.lastHealthyAt,
                     pinHighestQuality: Config.PinHighestQuality,
                     qualityFlagInStorage: (() => { try { return localStorage.getItem(QUALITY_KEY); } catch { return 'unreadable'; } })()
                 },
