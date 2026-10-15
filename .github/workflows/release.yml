@@ -22,16 +22,21 @@ jobs:
       - name: Run tests and build
         run: npm run verify
       - name: Verify tag matches extension version
+        id: package
         run: |
           APP_VERSION=$(node -p "require('./manifest.json').version")
           test "$GITHUB_REF_NAME" = "v$APP_VERSION"
+          echo "version=$APP_VERSION" >> "$GITHUB_OUTPUT"
       - name: Package Chromium MV3 extension
-        run: |
-          cd dist/AtomicTTV-Chromium-1.0.1
-          zip -qr ../AtomicTTV-Chromium-1.0.1.zip .
-          cd ..
-          unzip -t AtomicTTV-Chromium-1.0.1.zip
-      - name: Publish release with installation package
-        run: gh release create "$GITHUB_REF_NAME" dist/AtomicTTV-Chromium-1.0.1.zip --generate-notes --title "AtomicTTV $GITHUB_REF_NAME"
         env:
+          APP_VERSION: ${{ steps.package.outputs.version }}
+        run: |
+          cd "dist/AtomicTTV-Chromium-$APP_VERSION"
+          zip -qr "../AtomicTTV-Chromium-$APP_VERSION.zip" .
+          cd ..
+          unzip -t "AtomicTTV-Chromium-$APP_VERSION.zip"
+      - name: Publish release with installation package
+        run: gh release create "$GITHUB_REF_NAME" "dist/AtomicTTV-Chromium-$APP_VERSION.zip" --generate-notes --title "AtomicTTV $GITHUB_REF_NAME"
+        env:
+          APP_VERSION: ${{ steps.package.outputs.version }}
           GH_TOKEN: ${{ github.token }}
