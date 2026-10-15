@@ -22,7 +22,7 @@ After a tested release is published, review the code and install the VAFT usersc
 
 [Install AtomicTTV VAFT](https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/vaft/vaft.user.js)
 
-The userscript's \`@updateURL\` points to this fork's \`master\` branch. For reproducible installations, use a commit-specific permalink and update manually instead. **Until this development branch is merged, the link above still serves the unmodified upstream script.**
+The userscript's `@updateURL` points to this fork's `master` branch. For reproducible installations, use a commit-specific permalink and update manually instead. **Until this development branch is merged, the link above still serves the unmodified upstream script.**
 
 For Chromium-based browsers, user scripts may need to be explicitly allowed in the userscript manager's extension settings.
 
@@ -30,9 +30,9 @@ For Chromium-based browsers, user scripts may need to be explicitly allowed in t
 
 Requires Node.js 20 or later. No runtime dependencies are required by the test suite.
 
-\`\`\`bash
+```bash
 npm run check
-\`\`\`
+```
 
 This runs JavaScript syntax checks for the browser userscripts and uBlock scriptlets, plus Node.js unit tests. The tests currently cover **selected playlist-transform behaviour and installation metadata**. They do not simulate a live Twitch session.
 
