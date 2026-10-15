@@ -15,7 +15,7 @@
 ## Phase 1: isolate and test playlist logic
 
 - [ ] Extract reusable parsing/normalization functions from the large VAFT script (without changing browser behaviour).
-- [ ] Add real-world but sanitized HLS fixtures for \`EXTINF\`, stitched ad markers, dateranges, prefetch and discontinuity transitions.
+- [ ] Add real-world but sanitized HLS fixtures for `EXTINF`, stitched ad markers, dateranges, prefetch and discontinuity transitions.
 - [ ] Test timestamp and segment continuity, replayed or duplicated segments, and failure to obtain a clean backup.
 - [ ] Define invariants for media-sequence, Twitch live-sequence, clock drift and restored rendition.
 - [ ] Add bounded retry/backoff and guard against repeated reload loops.
