@@ -12,12 +12,24 @@ permissions:
 
 jobs:
   node-tests:
-    name: Syntax and regression tests
+    name: Syntax, HLS regression and package verification
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Validate scripts and run unit tests
-        run: npm run check
+      - name: Validate sources and build extension
+        run: npm run verify
+      - name: Package installable Chromium extension
+        run: |
+          cd dist/AtomicTTV-Chromium-1.0.0
+          zip -qr ../AtomicTTV-Chromium-1.0.0.zip .
+          cd ..
+          unzip -t AtomicTTV-Chromium-1.0.0.zip
+      - name: Upload installable extension archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: AtomicTTV-Chromium-1.0.0
+          path: dist/AtomicTTV-Chromium-1.0.0.zip
+          if-no-files-found: error
