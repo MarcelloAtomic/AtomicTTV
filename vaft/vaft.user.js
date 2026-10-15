@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name         TwitchAdSolutions (vaft)
-// @namespace    https://github.com/pixeltris/TwitchAdSolutions
-// @version      37.0.0
-// @description  Multiple solutions for blocking Twitch ads (vaft)
-// @updateURL    https://github.com/pixeltris/TwitchAdSolutions/raw/master/vaft/vaft.user.js
-// @downloadURL  https://github.com/pixeltris/TwitchAdSolutions/raw/master/vaft/vaft.user.js
+// @name         AtomicTTV (VAFT)
+// @namespace    https://github.com/MarcelloAtomic/AtomicTTV
+// @version      37.0.1
+// @description  Experimental maintained fork of VAFT; stream playback reliability under evaluation
+// @updateURL    https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/vaft/vaft.user.js
+// @downloadURL  https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/vaft/vaft.user.js
 // @author       https://github.com/cleanlock/VideoAdBlockForTwitch#credits
 // @match        *://*.twitch.tv/*
 // @run-at       document-start
@@ -400,6 +400,7 @@
             line = line
                 .replaceAll(/(X-TV-TWITCH-AD-URL=")(?:[^"]*)(")/g, `$1${newAdUrl}$2`)
                 .replaceAll(/(X-TV-TWITCH-AD-CLICK-TRACKING-URL=")(?:[^"]*)(")/g, `$1${newAdUrl}$2`);
+            lines[i] = line;
             if (i < lines.length - 1 && line.startsWith('#EXTINF') && (!line.includes(',live') || stripAllSegments || AllSegmentsAreAdSegments)) {
                 const segmentUrl = lines[i + 1];
                 if (!AdSegmentCache.has(segmentUrl)) {

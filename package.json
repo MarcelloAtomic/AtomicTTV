@@ -1,0 +1,16 @@
+{
+  "name": "atomicttv",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "AtomicTTV ad-filtering userscript, extension packaging and regression suite",
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check atomicttv/atomicttv.user.js && node --check vaft/vaft.user.js && node --check video-swap-new/video-swap-new.user.js && node --check strip/strip.user.js && node scripts/check-scriptlets.mjs && npm test",
+    "package:extension": "node scripts/package-extension.mjs",
+    "verify": "npm run check && npm run package:extension"
+  }
+}
