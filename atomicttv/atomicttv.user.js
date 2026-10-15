@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AtomicTTV
 // @namespace    https://github.com/MarcelloAtomic/AtomicTTV
-// @version      1.0.1
+// @version      1.0.2
 // @description  AtomicTTV: experimental Twitch stream ad filtering with playback recovery
 // @updateURL    https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv.user.js
 // @downloadURL  https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv.user.js
@@ -12,7 +12,7 @@
 // @grant        none
 // ==/UserScript==
 
-// AtomicTTV 1.0.1 - based on scamorza/TwitchAdBlock 2.2.3 (upstream SHA a1453021869b43870e30fac4c384d09b60bef435)
+// AtomicTTV 1.0.2 - based on scamorza/TwitchAdBlock 2.2.3 (upstream SHA a1453021869b43870e30fac4c384d09b60bef435)
 // Original algorithm and historical contributions: pixeltris/TwitchAdSolutions (MIT).
 // See LICENSE and THIRD_PARTY_NOTICES.md. This script is not endorsed by Twitch.
 
@@ -130,7 +130,7 @@
     };
 
     const LEVELS = { debug: 10, info: 20, warn: 30, off: 99 };
-    const VERSION = (typeof GM_info !== 'undefined' && GM_info?.script?.version) || '1.0.1';
+    const VERSION = (typeof GM_info !== 'undefined' && GM_info?.script?.version) || '1.0.2';
     const seenOnce = new Map();
 
     function log(level, message) {

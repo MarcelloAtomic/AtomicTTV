@@ -21,6 +21,14 @@
 - [x] Keep full uBlock Origin scriptlet synchronized with this new worker engine.
 - [ ] Validate above-chat video ads in Brave/uBlock Origin during a real Twitch session.
 
+## uBlock Origin resource format (AtomicTTV 1.0.2)
+
+- [x] Reproduce resource truncation with uBO's actual `resourcesFromString` parser: only the opening wrapper reached injection, producing `Unexpected token 'catch'`.
+- [x] Remove empty lines when generating the legacy resource; normalize Windows line endings in generation and validation.
+- [x] Validate the parsed resource, bootstrap diagnostics/fetch/worker hooks in an isolated test, and run playlist regression cases against both userscript and parsed worker source.
+- [x] Document resource reload and distinguish a matching logger entry from successful startup.
+- [ ] Verify the corrected resource in the user's installed uBO and test real Twitch ads.
+
 ## Functional testing – NOT YET VERIFIED
 
 These require interactive playback and cannot be certified by GitHub CI:

@@ -1,11 +1,11 @@
-// Keep the uBlock Origin variant byte-for-byte synchronized with the installed AtomicTTV engine.
+// Generate the uBlock Origin resource from the installed AtomicTTV engine.
 // Usage: node scripts/sync-ublock.mjs --write  (regenerate)
 //        node scripts/sync-ublock.mjs --check  (CI: fail on stale files)
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const input = 'atomicttv/atomicttv.user.js';
 const output = 'atomicttv/atomicttv-ublock-origin.js';
-const source = readFileSync(input, 'utf8');
+const source = readFileSync(input, 'utf8').replace(/\r\n/g, '\n');
 const marker = '// ==/UserScript==';
 if (!source.startsWith('// ==UserScript==') || !source.includes(marker)) {
   throw new Error('AtomicTTV userscript metadata header not found.');
@@ -24,13 +24,20 @@ const header = [
   "    'use strict';",
   '    if (!/(^|\\.)twitch\\.tv$/.test(document.location.hostname)) { return; }',
 ].join('\n') + '\n';
-const generated = header + payload + '\n})();\n';
+// In uBO's resource format a blank line ENDS the resource, even inside a JS
+// function or template literal. The embedded template contains JavaScript worker
+// source, so dropping empty lines preserves its behavior. The parsed worker and
+// main bootstrap are both exercised by tests.
+const generated = (header + payload + '\n})();')
+  .split('\n')
+  .filter((line) => /\S/.test(line))
+  .join('\n') + '\n';
 
 if (process.argv.includes('--write')) {
   writeFileSync(output, generated);
   console.log('Updated', output, generated.length, 'bytes');
 } else if (process.argv.includes('--check')) {
-  if (readFileSync(output, 'utf8') !== generated) {
+  if (readFileSync(output, 'utf8').replace(/\r\n/g, '\n') !== generated) {
     throw new Error(output + ' is out of sync. Run: npm run build:ublock');
   }
   console.log('uBlock Origin scriptlet is in sync with the userscript source.');

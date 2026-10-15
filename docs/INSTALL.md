@@ -7,7 +7,7 @@
 Falls du uBlock Origin nicht nutzen möchtest:
 
 1. Öffne die [GitHub-Actions-Übersicht](https://github.com/MarcelloAtomic/AtomicTTV/actions/workflows/checks.yml) und wähle einen erfolgreichen Lauf.
-2. Lade unter **Artifacts** `AtomicTTV-Chromium-1.0.1` herunter und entpacke das Archiv sowie die darin enthaltene ZIP-Datei.
+2. Lade unter **Artifacts** `AtomicTTV-Chromium-1.0.2` herunter und entpacke das Archiv sowie die darin enthaltene ZIP-Datei.
 3. Öffne `brave://extensions`, aktiviere den Entwicklermodus und klicke auf **Entpackte Erweiterung laden**.
 4. Wähle den Ordner aus, der die Datei `manifest.json` enthält. Lade Twitch neu.
 

@@ -1,6 +1,6 @@
-import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
+import { Script } from 'node:vm';
+import { readUblockScriptlet } from './lib/ublock-resource.mjs';
 
 for (const file of [
   'atomicttv/atomicttv-ublock-origin.js',
@@ -8,11 +8,7 @@ for (const file of [
   'video-swap-new/video-swap-new-ublock-origin.js',
 ]) {
   const source = readFileSync(file, 'utf8');
-  const [header, ...body] = source.split('\n');
-  assert.match(header, /^twitch-videoad\.js text\/javascript\s*$/);
-  execFileSync(process.execPath, ['--check', '-'], {
-    input: body.join('\n'),
-    stdio: ['pipe', 'pipe', 'pipe'],
-  });
-  console.log('Syntax OK:', file);
+  const body = readUblockScriptlet(source);
+  new Script('try {\n' + body + '\n} catch (error) {}', { filename: file });
+  console.log('uBO-parsed syntax OK:', file);
 }

@@ -1,5 +1,5 @@
 twitch-videoad.js text/javascript
-// AtomicTTV 1.0.1 | uBlock Origin custom scriptlet
+// AtomicTTV 1.0.2 | uBlock Origin custom scriptlet
 // Source: https://github.com/MarcelloAtomic/AtomicTTV/blob/master/atomicttv/atomicttv.user.js
 // Based on MIT licensed TwitchAdSolutions and scamorza/TwitchAdBlock; see THIRD_PARTY_NOTICES.md
 // No remote Javascript loaded at runtime. Requires uBlock Origin userResourcesLocation.
@@ -7,20 +7,15 @@ twitch-videoad.js text/javascript
 (function () {
     'use strict';
     if (!/(^|\.)twitch\.tv$/.test(document.location.hostname)) { return; }
-
-
-// AtomicTTV 1.0.1 - based on scamorza/TwitchAdBlock 2.2.3 (upstream SHA a1453021869b43870e30fac4c384d09b60bef435)
+// AtomicTTV 1.0.2 - based on scamorza/TwitchAdBlock 2.2.3 (upstream SHA a1453021869b43870e30fac4c384d09b60bef435)
 // Original algorithm and historical contributions: pixeltris/TwitchAdSolutions (MIT).
 // See LICENSE and THIRD_PARTY_NOTICES.md. This script is not endorsed by Twitch.
-
 // Same core trick as vaft: when a playlist carries ad markers, refetch the channel under a
 // different playerType and serve that.
 //
 // Logs under [VAFT2].
-
 (function () {
     'use strict';
-
     // @match covers every *.twitch.tv frame, including hidden auth/ads ones. frameElement is no
     // help: it returns null instead of throwing on a cross-origin parent.
     if (window.self !== window.top) {
@@ -36,7 +31,6 @@ twitch-videoad.js text/javascript
             return;
         }
     }
-
     // Install two ad blockers and exactly one runs, whichever got there first; otherwise both hook
     // Worker and fetch. twitchAdSolutionsVersion is the name vaft and the pixeltris original use --
     // dropping it would make the two scripts invisible to each other.
@@ -50,7 +44,6 @@ twitch-videoad.js text/javascript
         return;
     }
     VERSION_MARKERS.forEach((name) => { window[name] = OUR_VERSION; });
-
     const Config = {
         // -- ad blocking ---------------------------------------------------------------------
         // Tried in order. mobile_feed (as android) is ad-free and uncapped; popout is a second
@@ -61,24 +54,20 @@ twitch-videoad.js text/javascript
         TraceContinuity: true,
         // Prime suspect in the reload loop; first thing to try if it reappears.
         RefreshTokenOnReload: true,
-
         // -- subscription --------------------------------------------------------------------
         // A subscription whose product is ad-free means the channel is never stitched, so the
         // playlist machinery has nothing to do there and stands back for the visit. Detection
         // only ever removes work: a refused or unreadable answer leaves everything armed.
         DetectSubscription: true,
-
         // -- overlay / squeezeback ads -------------------------------------------------------
         // Nothing is stitched in and the stream never stops: the picture shrinks, or a pod plays
         // above chat. Detection only; DeclineClientSideAds is what stops them.
         WatchOverlayAds: true,
-
         // -- client-side (display) ads --------------------------------------------------------
         // Twitch's ad manager drains its queue as:
         //     this.declineReason ? cmd.decline(this.declineReason) : this.isReady && cmd.fn()
         // cmd.fn() holds the fetch to the ad edge, so declineReason stops the request itself.
         DeclineClientSideAds: true,
-
         // -- page visibility -----------------------------------------------------------------
         // Always reports the page visible: stops the background downscale (720p60 -> 360p30 in ~2
         // min). Cost: a stalled sink now reaches a local pause(), which RecoverBlockedPlayback undoes.
@@ -87,23 +76,18 @@ twitch-videoad.js text/javascript
         // false player-core pauses in a branch that emits no event at all -- so the resume exists
         // to pay for the line above and is meaningless without it.
         get ResumeOnFocus() { return this.HideVisibility; },
-
         // -- quality -------------------------------------------------------------------------
         // Twitch's own 'video-quality-highest-available'. Does NOT prevent the background downscale
         // despite vaft's similarly-named option claiming so: HideVisibility is what stops that.
         PinHighestQuality: true,
-
         // -- recovery ------------------------------------------------------------------------
         // onSinkStop has three exits; only the muted one (pause + PlaybackBlocked, no retry) strands
         // the stream with nobody coming, so it is the only one acted on.
         RecoverBlockedPlayback: true,
-
-
         // A decode error tears the media element down and player-core does not retry -- it renders
         // "Error #3000" and waits for a click. Held before acting: the same signature appears for
         // a second or two during any ordinary load.
         RecoverDeadPlayer: true,
-
         // -- diagnostics ---------------------------------------------------------------------
         // The mark drawn over the player while an ad is being blocked, and its appearance. These
         // five are the ones a viewer changes, so they are the ones kept across an update --
@@ -125,11 +109,9 @@ twitch-videoad.js text/javascript
         // without the other means AD_SIGNIFIER has drifted.
         CrossCheckAdEvents: true
     };
-
     const LEVELS = { debug: 10, info: 20, warn: 30, off: 99 };
-    const VERSION = (typeof GM_info !== 'undefined' && GM_info?.script?.version) || '1.0.1';
+    const VERSION = (typeof GM_info !== 'undefined' && GM_info?.script?.version) || '1.0.2';
     const seenOnce = new Map();
-
     function log(level, message) {
         if ((LEVELS[level] || 20) < (LEVELS[Config.LogLevel] || 20)) {
             return;
@@ -141,7 +123,6 @@ twitch-videoad.js text/javascript
             console.log(line);
         }
     }
-
     // For conditions that repeat every playlist request: the first occurrence is never swallowed.
     function logOnce(key, level, message) {
         if (seenOnce.get(key) === message) {
@@ -150,11 +131,9 @@ twitch-videoad.js text/javascript
         seenOnce.set(key, message);
         log(level, message);
     }
-
     function clearOnce(key) {
         seenOnce.delete(key);
     }
-
     const State = {
         adActive: false,
         adIsMidroll: false,
@@ -169,12 +148,10 @@ twitch-videoad.js text/javascript
         subAskedFor: null,
         counters: { breaks: 0, reloads: 0, backupFailures: 0, recoveries: 0, deadPlayers: 0, continuityBreaks: 0 }
     };
-
     // Anything writing persistent state here also removes it: leaving the key behind when the
     // option is off leaves the setting applied to a browser that no longer asks for it.
     const QUALITY_KEY = 'video-quality-highest-available';
     const QUALITY_STAMP_KEY = 's-qs-ts';
-
     function applyQualityPreference(enabled) {
         try {
             if (enabled) {
@@ -190,7 +167,6 @@ twitch-videoad.js text/javascript
             log('debug', 'could not ' + (enabled ? 'set' : 'clear') + ' the quality preference: ' + err);
         }
     }
-
     function installVisibilityLayer() {
         if (!Config.HideVisibility) {
             return;
@@ -202,7 +178,6 @@ twitch-videoad.js text/javascript
         Visibility.isReallyHidden = () =>
             (nativeHidden ? nativeHidden.apply(document) === true : false) ||
             (nativeWebkitHidden ? nativeWebkitHidden.apply(document) === true : false);
-
         const define = (prop, value) => {
             try {
                 Object.defineProperty(document, prop, { get() { return value; } });
@@ -213,7 +188,6 @@ twitch-videoad.js text/javascript
         define('visibilityState', 'visible');
         define('hidden', false);
         define(/Firefox/.test(navigator.userAgent) ? 'mozHidden' : 'webkitHidden', false);
-
         const swallow = (e) => {
             // We run first and see the real event before swallowing it -- the only chance to
             // notice the window going away or coming back.
@@ -267,14 +241,12 @@ twitch-videoad.js text/javascript
         });
         Visibility.installed = true;
     }
-
     const Visibility = {
         installed: false,
         wasPlaying: false,
         isReallyHidden: () => false,
         allowNextVisibilityChange: false
     };
-
     function findReactNode(root, predicate) {
         if (root.stateNode && predicate(root.stateNode)) {
             return root.stateNode;
@@ -289,12 +261,10 @@ twitch-videoad.js text/javascript
         }
         return null;
     }
-
     // Walking the fiber tree is by far this script's main-thread cost, so the result is cached.
     // The instances it finds change only when the player is rebuilt, and the <video> the player
     // owns is detached when that happens -- so isConnected is an O(1) test for "still the pair".
     let playerCache = null;
-
     // player-core guards every method with `this.core || warn('Method called on deleted player
     // instance.')`, so a destroyed instance has core falsy. Reading the property costs nothing and
     // prints nothing, where asking a torn-down instance for its video element spams that warning
@@ -303,7 +273,6 @@ twitch-videoad.js text/javascript
     function playerIsDeleted(p) {
         return !!p && 'core' in p && !p.core;
     }
-
     function playerCacheIsLive() {
         if (!playerCache) { return false; }
         try {
@@ -320,7 +289,6 @@ twitch-videoad.js text/javascript
             return false;
         }
     }
-
     function getPlayer() {
         if (playerCacheIsLive()) {
             return playerCache;
@@ -356,7 +324,6 @@ twitch-videoad.js text/javascript
         playerCache = instance && controller ? { player: instance, controller, video } : null;
         return playerCache;
     }
-
     // play() hands back a promise. Dropping it loses the difference between the browser refusing
     // the call and the call going through with the player staying paused anyway.
     function playPlayer(player, context) {
@@ -367,13 +334,11 @@ twitch-videoad.js text/javascript
             log('debug', 'play() threw after ' + context + ': ' + err);
         }
     }
-
     // How long after our play() we check that it took, and how many times we escalate. Sub-
     // parameters of RecoverBlockedPlayback: meaningless with it off.
     const RESUME_VERIFY_DELAY_MS = 2000;
     const RESUME_VERIFY_ATTEMPTS = 2;
     const Resume = { timer: null, attempts: 0 };
-
     function verifyResumed(isNewAttempt) {
         if (!Config.RecoverBlockedPlayback) {
             return;
@@ -411,9 +376,7 @@ twitch-videoad.js text/javascript
             }
         }, RESUME_VERIFY_DELAY_MS);
     }
-
     let listenersAttachedTo = null;
-
     function attachPlayerListeners(player) {
         if (!player?.addEventListener || listenersAttachedTo === player) {
             return;
@@ -426,7 +389,6 @@ twitch-videoad.js text/javascript
                 log('warn', 'could not listen for ' + event + ': ' + err);
             }
         };
-
         if (Config.RecoverBlockedPlayback) {
             // The one case player-core abandons: muted, sink stopped, pauses with no retry.
             on('PlayerPlaybackBlocked', () => {
@@ -441,7 +403,6 @@ twitch-videoad.js text/javascript
                 log('warn', 'AudioBlocked -- Twitch muted the stream to keep it playing; unmute manually to get sound back');
             });
         }
-
         if (Config.CrossCheckAdEvents) {
             on('stitchedadstart', () => {
                 State.playerAdEvent = 'start';
@@ -453,7 +414,6 @@ twitch-videoad.js text/javascript
             });
         }
     }
-
     // The player instance is replaced on reload, so re-check when we touch it rather than polling.
     function ensurePlayerWired() {
         const found = getPlayer();
@@ -462,7 +422,6 @@ twitch-videoad.js text/javascript
         }
         return found;
     }
-
     // A paused player and a destroyed one look identical through the player object: both report
     // isPaused() and sit in Idle. The <video> tells them apart -- a user pause leaves the media
     // loaded, a decode error leaves readyState 0, no buffered ranges and no frame.
@@ -477,7 +436,6 @@ twitch-videoad.js text/javascript
             return false;
         }
     }
-
     // hev1 and hvc1 are the same decoder; everything else compares on the part before the first
     // dot. Duplicated from the worker's copy: different realms, and the worker is built from text.
     function codecFamilyOf(codecs) {
@@ -487,7 +445,6 @@ twitch-videoad.js text/javascript
         if (base.startsWith('av0')) { return 'av1'; }
         return base || '?';
     }
-
     // A hole in buffered is the defect the viewer sees: one range means clean. Sampled twice
     // because the first segments after a swap have not arrived when the break is declared over.
     function readBufferedRanges() {
@@ -500,7 +457,6 @@ twitch-videoad.js text/javascript
         return { at: video.currentTime, ranges: out, ready: video.readyState,
                  head: out.length ? out[0].start : null, tail: out.length ? out[out.length - 1].end : null };
     }
-
     function describeBuffered(sample) {
         if (!sample || !sample.ranges.length) { return 'no buffer'; }
         if (sample.ranges.length === 1) { return 'contiguous'; }
@@ -511,7 +467,6 @@ twitch-videoad.js text/javascript
         }
         return sample.ranges.length + ' ranges, hole(s) ' + holes.join(', ');
     }
-
     // Stall census. MEASUREMENT ONLY: it never touches the player.
     // Three samples and the buffer head alongside the playhead, because a stall and a rebuilt media
     // element look identical on currentTime alone: if the buffer head jumps back too the timeline
@@ -521,7 +476,6 @@ twitch-videoad.js text/javascript
     const Stalls = { seen: 0, nearExit: 0, clear: 0, during: 0, exits: 0, lastExitAt: null,
                      clearMs: 0, prevAt: null, prevCt: null, prevEl: null, frozen: 0, inStall: false,
                      aheadAtFreeze: null, latAtFreeze: null, lastStallAt: null };
-
     // The real latency, asked of the player instead of scraped from the panel (the
     // facade exposes getLiveLatency). One read, and getPlayer is already cached.
     function readLiveLatency() {
@@ -532,7 +486,6 @@ twitch-videoad.js text/javascript
             return null;
         }
     }
-
     function startStallCensus() {
         if (!Config.TraceContinuity) { return; }
         setInterval(() => {
@@ -598,7 +551,6 @@ twitch-videoad.js text/javascript
             }
         }, 500);
     }
-
     function reportExitBuffer() {
         // Read and cleared here, not at the bottom: the report has two early returns, and a value
         // that survives an unmeasurable exit is later subtracted from ANOTHER break's depth,
@@ -679,7 +631,6 @@ twitch-videoad.js text/javascript
             }, 6000);
         }, 2000);
     }
-
     function describePlayback() {
         try {
             const player = getPlayer()?.player;
@@ -710,13 +661,11 @@ twitch-videoad.js text/javascript
             return 'quality unreadable: ' + err;
         }
     }
-
     // Loop guard: a second reload inside this window degrades to pause/play. A reload that
     // settled nothing is a genuinely stuck player, not a routine exit -- shortening it is what
     // turns the mitigation back into the loop it exists to break.
     const RELOAD_COOLDOWN_MS = 90000;
     let lastReloadAt = 0;
-
     function reloadPlayer() {
         const found = ensurePlayerWired();
         if (!found) {
@@ -754,7 +703,6 @@ twitch-videoad.js text/javascript
         playPlayer(found.player, 'reload');
         verifyResumed(true);
     }
-
     function pauseResumePlayer() {
         const found = ensurePlayerWired();
         if (!found || found.player.isPaused?.() || found.player.core?.paused) {
@@ -769,14 +717,12 @@ twitch-videoad.js text/javascript
         playPlayer(found.player, 'pause/play');
         verifyResumed(true);
     }
-
     // Coarse and off by default: player-core already recovers shallow underruns. The only gap
     // worth covering is a player frozen long enough that nobody is coming for it.
     // The player is not stalled: it is gone outright, and player-core does not retry.
     // Held before acting: the same signature appears for a second or two during any ordinary
     // load, so a shorter wait reloads healthy players mid-startup.
     const DEAD_PLAYER_SECONDS = 12;
-
     function startDeadPlayerWatch() {
         if (!Config.RecoverDeadPlayer) {
             return;
@@ -820,7 +766,6 @@ twitch-videoad.js text/javascript
             }
         }, 3000);
     }
-
     // Octagon with the raised hand cut out of it, as one filled path.
     const MARK_PATH = 'M7.775 0a1.8 1.8 0 0 0-1.273.527L.528 6.503A1.8 1.8 0 0 0 0 7.775v8.45c0 .' +
         '478.19.936.528 1.274l5.974 5.974A1.8 1.8 0 0 0 7.775 24h8.45a1.8 1.8 0 0 0 1.273-.527l5.' +
@@ -832,7 +777,6 @@ twitch-videoad.js text/javascript
         '.99.849.99l.007 3.583s-.004.172.167.172c.16 0 .141-.172.141-.172l.01-5.926s-.055-1.162.9' +
         '66-1.162c1.04 0 .983 1.142.983 1.142v5.611s-.005.204.152.204c.168 0 .154-.206.154-.206l.' +
         '01-6.693S11.18 3 12.202 3Z';
-
     // The script file is replaced by every update, so an edit to Config does not survive one.
     const BANNER_KEY = 'vaft2-banner';
     const BANNER_DEFAULTS = {
@@ -842,14 +786,12 @@ twitch-videoad.js text/javascript
         ColorBanner: Config.ColorBanner,
         HaloBanner: Config.HaloBanner
     };
-
     // A stored setting is honoured only while it still exists here and still holds the same kind
     // of value: one that has been renamed or repurposed is dropped rather than half-applied.
     function bannerPrefIsUsable(name, value) {
         return Object.prototype.hasOwnProperty.call(BANNER_DEFAULTS, name) &&
             typeof value === typeof BANNER_DEFAULTS[name];
     }
-
     function loadBannerPrefs() {
         let stored = null;
         try {
@@ -867,7 +809,6 @@ twitch-videoad.js text/javascript
             }
         });
     }
-
     // Only what differs is written, and the key is removed once nothing does: a stored copy of
     // today's default would pin it against a later one.
     function saveBannerPrefs() {
@@ -887,7 +828,6 @@ twitch-videoad.js text/javascript
             log('debug', 'could not store the banner settings: ' + err);
         }
     }
-
     function updateBanner() {
         if (!Config.ShowBanner) {
             // Swept, not just skipped: the switch can be flipped through window.vaft2.config with
@@ -943,11 +883,9 @@ twitch-videoad.js text/javascript
         }
         overlay.style.display = State.adActive ? 'block' : 'none';
     }
-
     // Switching channel replaces the stream without a reload, and the playlist that would report
     // the end of the break stops being polled. Nothing expires on its own.
     const Navigation = { channel: null, left: null };
-
     // A playlist response for the channel being left can land after the reset and repopulate it.
     // Narrow on purpose: dropping everything that is not the current channel would also drop real
     // breaks on embed players, where the location names no channel at all.
@@ -958,13 +896,11 @@ twitch-videoad.js text/javascript
         }
         return channel === Navigation.left && channel !== Navigation.channel;
     }
-
     // Not exhaustive on purpose: a page mistaken for a channel still reads as a change on the way out.
     const NOT_A_CHANNEL = {
         directory: 1, videos: 1, settings: 1, subscriptions: 1, wallet: 1, drops: 1,
         friends: 1, downloads: 1, jobs: 1, turbo: 1, prime: 1, search: 1, u: 1, p: 1, '': 1
     };
-
     function channelFromLocation() {
         try {
             const parts = document.location.pathname.split('/').filter(Boolean);
@@ -980,7 +916,6 @@ twitch-videoad.js text/javascript
             return null;
         }
     }
-
     function resetForChannelChange(previous, next, how) {
         const carried = State.adActive;
         Navigation.left = previous;
@@ -1004,10 +939,8 @@ twitch-videoad.js text/javascript
         Stalls.inStall = false;
         clearOnce('blocking');
         clearOnce('leak');
-
         // Releases the worker's copy of the break.
         postToWorkers({ key: 'ChannelChanged', value: previous });
-
         // Swept, not left to updateBanner: that only reaches the overlay under the current
         // .video-player, and React may have replaced it.
         try {
@@ -1016,7 +949,6 @@ twitch-videoad.js text/javascript
             log('debug', 'could not hide the banner after a channel change: ' + err);
         }
         updateBanner();
-
         // No pause/play and no reload: Twitch is already rebuilding the stream.
         if (carried) {
             log('info', 'left the channel mid-break -- state cleared');
@@ -1024,7 +956,6 @@ twitch-videoad.js text/javascript
             log('debug', 'channel changed (nothing carried) via ' + how);
         }
     }
-
     // Keyed on history rather than on anything of Twitch's: pushState, replaceState and popstate are
     // the only ways a single-page app changes the URL, and they do not get renamed in a rebuild.
     function installNavigationWatch() {
@@ -1061,7 +992,6 @@ twitch-videoad.js text/javascript
         // against the state staying stuck for the session.
         setInterval(() => onNavigate('poll'), 2000);
     }
-
     // Keys on the one effect no implementation can avoid: the video getting smaller than its
     // container. Recorded into a rolling buffer -- by the time it is noticed the DOM is clean.
     const OverlayAds = {
@@ -1075,11 +1005,9 @@ twitch-videoad.js text/javascript
         hidden: [],
         strip: null
     };
-
     // 20 ticks of the 500ms overlay poll: one sweep every 10s while the mini-player is absent,
     // instead of two a second.
     const PBYP_LOOKUP_EVERY = 20;
-
     function findPictureByPictureContext() {
         const rootNode = document.querySelector('#root');
         const key = rootNode && Object.keys(rootNode).find((x) => x.startsWith('__reactContainer'));
@@ -1107,14 +1035,12 @@ twitch-videoad.js text/javascript
         })(rootNode[key], 0);
         return found;
     }
-
     function sampleOverlayState() {
         const video = document.getElementsByTagName('video')[0];
         const container = document.querySelector('.video-player');
         const videoRect = video ? video.getBoundingClientRect() : null;
         const containerRect = container ? container.getBoundingClientRect() : null;
         const iframes = [...document.querySelectorAll('iframe')].map((f) => String(f.src).slice(0, 90));
-
         // The walk below is the same whole-fiber sweep getPlayer() is cached against,
         // and the mini-player is absent in the ordinary case -- so an unconditional lookup ran it
         // twice a second for the life of the tab, on the axis this script most has to stay cheap.
@@ -1129,7 +1055,6 @@ twitch-videoad.js text/javascript
             }
         }
         const pbyp = OverlayAds.pbypInstance && OverlayAds.pbypInstance.state;
-
         return {
             t: new Date().toISOString().slice(11, 19),
             vw: videoRect ? Math.round(videoRect.width) : null,
@@ -1159,7 +1084,6 @@ twitch-videoad.js text/javascript
             } : null
         };
     }
-
     function pollOverlayAds() {
         try {
             const sample = sampleOverlayState();
@@ -1177,7 +1101,6 @@ twitch-videoad.js text/javascript
             const pbypActive = !!(sample.pbyp && (sample.pbyp.showingMirrorPod || sample.pbyp.isShowing ||
                 sample.pbyp.rollType || sample.pbyp.adSessionID));
             const anomalous = shrunk || pbypActive;
-
             if (anomalous && !OverlayAds.anomalyActive) {
                 OverlayAds.anomalyActive = true;
                 OverlayAds.seen++;
@@ -1196,7 +1119,6 @@ twitch-videoad.js text/javascript
             log('debug', 'overlay-ad poll error: ' + err);
         }
     }
-
     // Observation only. Twitch's class names are hashed and change between builds, so this records
     // what was there rather than matching by name.
     function describeOverlayLayout() {
@@ -1218,7 +1140,6 @@ twitch-videoad.js text/javascript
         }
         return { chain };
     }
-
     // -- client-side ad manager ---------------------------------------------------------------
     // Found through webpack's module registry by the names of its static methods, which
     // minification keeps. No module id, asset hash or url is hardcoded, so it survives releases.
@@ -1233,7 +1154,6 @@ twitch-videoad.js text/javascript
     const AD_DECLINE_RECHECK_MS = 30000;
     const AdManager = { applied: false, attempts: 0, reason: null, moduleId: null,
                         recoveries: 0, lastHealthyAt: null };
-
     function webpackRequire() {
         const key = Object.keys(window).find((k) => /^webpackChunk/i.test(k));
         const queue = key ? window[key] : null;
@@ -1254,7 +1174,6 @@ twitch-videoad.js text/javascript
         }
         return req;
     }
-
     function findAdManagerClass(req) {
         const factories = req.m || {};
         for (const id of Object.keys(factories)) {
@@ -1288,7 +1207,6 @@ twitch-videoad.js text/javascript
         }
         return null;
     }
-
     function declineClientSideAds() {
         const req = webpackRequire();
         if (!req) {
@@ -1322,7 +1240,6 @@ twitch-videoad.js text/javascript
             + ' (' + AdManager.reason + ') -- display ads will not be requested');
         return true;
     }
-
     function startAdManagerDecline() {
         if (!Config.DeclineClientSideAds) {
             return;
@@ -1362,7 +1279,6 @@ twitch-videoad.js text/javascript
             setTimeout(attempt, delay);
         })();
     }
-
     function startOverlayAdWatch() {
         if (!Config.WatchOverlayAds) {
             return;
@@ -1372,10 +1288,8 @@ twitch-videoad.js text/javascript
         setInterval(pollOverlayAds, 500);
         pollOverlayAds();
     }
-
     // Generous against the two a page actually runs.
     const WORKER_KEEP = 8;
-
     // The worker cannot see the page's auth headers.
     const GQL = {
         clientId: 'kimne78kx3ncx6brgo4mv6wki5h1ko',
@@ -1385,7 +1299,6 @@ twitch-videoad.js text/javascript
         integrity: null,
         authorization: undefined
     };
-
     async function performWorkerFetch(request) {
         try {
             const response = await window.__vaft2RealFetch(request.url, request.options);
@@ -1400,7 +1313,6 @@ twitch-videoad.js text/javascript
             return { id: request.id, error: err?.message || String(err) };
         }
     }
-
     function postToWorkers(message) {
         State.workers.forEach((worker) => {
             try {
@@ -1410,7 +1322,6 @@ twitch-videoad.js text/javascript
             }
         });
     }
-
     // fetch takes a string, a URL or a Request, and Twitch uses all three. Testing for a string
     // skipped the other two: fetch(new Request(url, {...})) never reached the pbyp denial, and its
     // body is not in init either -- it lives in the Request and only comes out through a clone.
@@ -1422,11 +1333,9 @@ twitch-videoad.js text/javascript
         } catch {}
         return '';
     }
-
     function installFetchHook() {
         const realFetch = window.fetch;
         window.__vaft2RealFetch = realFetch;
-
         window.fetch = function (input, init) {
             // Not async on purpose: anything thrown here escapes synchronously into Twitch's own
             // code, so every access below has to tolerate the shape it is given.
@@ -1464,7 +1373,6 @@ twitch-videoad.js text/javascript
             return realFetch.apply(this, arguments);
         };
     }
-
     function readHeader(headers, name) {
         if (!headers) {
             return undefined;
@@ -1481,7 +1389,6 @@ twitch-videoad.js text/javascript
         const key = Object.keys(headers).find((x) => x.toLowerCase() === lower);
         return key === undefined ? undefined : headers[key];
     }
-
     function captureGqlHeaders(init) {
         const headers = init && init.headers;
         if (!headers) {
@@ -1507,20 +1414,17 @@ twitch-videoad.js text/javascript
             detectSubscription(channelFromLocation());
         }
     }
-
     // AdRequestHandling carries the viewer's relationship with the channel. Asked for on its own
     // rather than read out of Twitch's own batch: that batch carries dozens of operations and its
     // answer lands after the master playlist has already been requested, which is too late to
     // stand anything down. Alone it is one small round trip, and it fits in the gap before it.
     const AD_REQUEST_HANDLING_HASH = '61a5ecca6da3d924efa9dbde811e051b8a10cb6bd0fe22c372c2f4401f3e88d1';
-
     // self is null without credentials, subscriptionBenefit is null without a subscription, and a
     // subscription can exist on a product that is not ad-free: all three fall to false, so every
     // way of not knowing leaves us armed.
     function subscriptionIsAdFree(answer) {
         return answer?.data?.user?.self?.subscriptionBenefit?.product?.hasAdFree === true;
     }
-
     function detectSubscription(channel) {
         if (!Config.DetectSubscription || !channel || State.subAskedFor === channel) {
             return;
@@ -1557,7 +1461,6 @@ twitch-videoad.js text/javascript
                 log('debug', 'subscription check failed: ' + err);
             });
     }
-
     function rewriteGqlBody(init, realFetch) {
         if (!init || typeof init.body !== 'string' || !init.body.includes('PlaybackAccessToken')) {
             return null;
@@ -1572,7 +1475,6 @@ twitch-videoad.js text/javascript
         const operations = Array.isArray(parsed) ? parsed : [parsed];
         const isPictureByPicture = (op) => typeof op?.variables?.playerType === 'string' &&
             op.variables.playerType.includes('picture-by-picture');
-
         // Mini player above chat. Denied locally rather than by sending something the server will
         // reject: a rejection shaped like an error is the kind Twitch retries.
         if (operations.length > 0 && operations.every(isPictureByPicture)) {
@@ -1615,23 +1517,19 @@ twitch-videoad.js text/javascript
                 return realFetch('https://gql.twitch.tv/gql', init);
             });
         }
-
         // No playerType rewrite here on purpose: it costs a fixed second of latency, and the
         // exemption it buys does not hold on a logged-in account.
         return null;
     }
-
     // Authored as worker code, not page functions put through toString(), so there is no hidden
     // dependency on page scope. No template literals below: this block is itself inside one.
     const WORKER_SOURCE = `
 'use strict';
-
 // VAFT2_INIT is prepended as a JSON literal. Config arrives embedded rather than by postMessage:
 // Twitch's wasm worker reads every message delivered to the worker, took our Init as one of its own
 // and threw during startup. Whatever still has to be sent is hidden from it below.
 var CONFIG = VAFT2_INIT.config;
 var GQLState = VAFT2_INIT.gql;
-
 // Overrides stream.currentVariant when choosing a backup rendition: right after a codec step-down
 // that is the bottom of the ladder, and a backup swap leaves no ladder to climb back up.
 var streamsByChannel = Object.create(null);
@@ -1644,7 +1542,6 @@ var lastReloadAt = 0;
 var standBack = Object.create(null);
 var onceMessages = new Map();
 var workerRealFetch = null;
-
 // Zero bytes, because we never learn which codec the SourceBuffer was opened with. A one-frame
 // mp4 with an avc1 sample description is harmless on h264 and fatal on hevc (Error #3000).
 // MSE treats an empty append as a no-op and the player still gets its 200.
@@ -1655,17 +1552,14 @@ function emptySegmentResponse() {
         headers: { 'Content-Type': 'video/mp4', 'Content-Length': '0' }
     });
 }
-
 function wlog(level, message) {
     self.postMessage({ key: 'Log', level: level, message: message });
 }
-
 function wlogOnce(key, level, message) {
     if (onceMessages.get(key) === message) { return; }
     onceMessages.set(key, message);
     wlog(level, message);
 }
-
 function parseAttributes(line) {
     var out = Object.create(null);
     var parts = line.split(/(?:^|,)((?:[^=]*)=(?:"[^"]*"|[^,]*))/).filter(Boolean);
@@ -1679,7 +1573,6 @@ function parseAttributes(line) {
     }
     return out;
 }
-
 // Both dialects tried regardless of what the URL suggested: the flag is derived from a URL that
 // may not be the one this text came from, and a mismatch left a promise that never settled.
 function readServerTime(text) {
@@ -1688,7 +1581,6 @@ function readServerTime(text) {
     var v1 = text.match(/SERVER-TIME="([0-9.]+)"/);
     return v1 && v1.length > 1 ? v1[1] : null;
 }
-
 function writeServerTime(text, serverTime) {
     if (!serverTime) { return text; }
     if (text.indexOf('#EXT-X-SESSION-DATA:DATA-ID="SERVER-TIME"') >= 0) {
@@ -1696,7 +1588,6 @@ function writeServerTime(text, serverTime) {
     }
     return text.replace(/(SERVER-TIME=")[0-9.]+"/, 'SERVER-TIME="' + serverTime + '"');
 }
-
 function gqlRequest(body) {
     // An invented device id must never travel with the page's real Client-Integrity: that looks
     // like a replay, the server burns the token, and the page's own requests start failing.
@@ -1732,7 +1623,6 @@ function gqlRequest(body) {
         });
     });
 }
-
 // An optimisation: Twitch's own client sends the full document, so a refusal just switches
 // the session over to it.
 var PERSISTED_HASH = 'ed230aa1e33e07eebb8928504583da78a5173989fadfb1ac94be06a04f3cdbe9';
@@ -1740,11 +1630,9 @@ var TOKEN_QUERY = 'query PlaybackAccessToken($login: String!, $isLive: Boolean!,
     ' streamPlaybackAccessToken(channelName: $login, params: {platform: $platform, playerBackend: "mediaplayer", playerType: $playerType}) @include(if: $isLive) { value signature }' +
     ' videoPlaybackAccessToken(id: $vodID, params: {platform: $platform, playerBackend: "mediaplayer", playerType: $playerType}) @include(if: $isVod) { value signature }' +
     ' }';
-
 // Player types that must be asked for as a mobile client -- the same mobile_feed asked as web comes
 // back stitched every time, so the exemption needs the pair.
 var PLATFORM_MOBILE = { autoplay: 1, mobile_feed: 1 };
-
 function requestAccessToken(channel, playerType) {
     var variables = {
         isLive: true, login: channel, isVod: false, vodID: '',
@@ -1775,14 +1663,12 @@ function requestAccessToken(channel, playerType) {
         throw new Error(errors);
     });
 }
-
 function buildUsherUrl(stream, token) {
     var url = new URL(stream.usherBase);
     url.searchParams.set('sig', token.signature);
     url.searchParams.set('token', token.value);
     return url.href;
 }
-
 // hev1 and hvc1 are both HEVC and interchangeable here; everything else is compared on the part
 // before the first dot, which is what distinguishes the decoders.
 function codecFamily(codecs) {
@@ -1793,7 +1679,6 @@ function codecFamily(codecs) {
     if (base.indexOf('av0') === 0) { return 'av1'; }
     return base;
 }
-
 // Same codec is mandatory: handing an avc1 playlist to a player decoding hev1 stops it dead until
 // the page is reloaded by hand. No compatible variant means null and the caller moves on.
 function pickVariant(masterText, want) {
@@ -1806,7 +1691,6 @@ function pickVariant(masterText, want) {
         all.push({ url: lines[i + 1], resolution: attrs['RESOLUTION'], frameRate: attrs['FRAME-RATE'], codecs: attrs['CODECS'] });
     }
     if (!all.length) { return null; }
-
     var pool = all;
     var wantFamily = want && codecFamily(want.codecs);
     if (wantFamily) {
@@ -1816,7 +1700,6 @@ function pickVariant(masterText, want) {
             return null;
         }
     }
-
     var wantPixels = 0;
     if (want && want.resolution) {
         var wh = want.resolution.split('x');
@@ -1836,16 +1719,12 @@ function pickVariant(masterText, want) {
     ranked.sort(function (a, b) { return a.rank - b.rank || a.delta - b.delta; });
     return ranked;
 }
-
-
 // The substring Twitch puts in a stitched break. A fact about their playlist format, not a
 // preference: any other value silently stops every detection in this file.
 var AD_SIGNIFIER = 'stitched';
-
 function hasAdMarkers(text) {
     return text.indexOf(AD_SIGNIFIER) >= 0;
 }
-
 // Removes ad segments, the low-latency prefetch hints while an ad is running, and the DATERANGEs
 // that light Twitch's own ad UI.
 function stripAds(text, stream) {
@@ -1882,7 +1761,6 @@ function stripAds(text, stream) {
     adSegments.forEach(function (at, key) { if (at < cutoff) { adSegments.delete(key); } });
     return lines.filter(function (l) { return l !== ''; }).join('\\n');
 }
-
 // A master only changes when the stream restarts, but fetching one costs a GQL token round-trip
 // bridged through the page plus an usher request. Uncached, every playlist poll during a break
 // repeated that for every player type: up to nine round-trips every couple of seconds.
@@ -1901,9 +1779,7 @@ function fetchBackupMaster(stream, playerType, realFetch) {
             return text;
         });
 }
-
 function workerSleep(ms) { return new Promise(function (resolve) { setTimeout(resolve, ms); }); }
-
 function onMasterPlaylist(url, text, realFetch) {
     var match = new URL(url).pathname.match(/([^\\/]+)(?=\\.\\w+$)/);
     if (!match) {
@@ -1926,7 +1802,6 @@ function onMasterPlaylist(url, text, realFetch) {
     usher.searchParams.delete('sig');
     usher.searchParams.delete('token');
     stream.usherBase = usher.href;
-
     var lines = text.replace(/\\r/g, '').split('\\n');
     for (var i = 0; i < lines.length - 1; i++) {
         if (lines[i].indexOf('#EXT-X-STREAM-INF') !== 0 || lines[i + 1].indexOf('.m3u8') < 0) { continue; }
@@ -1946,11 +1821,9 @@ function onMasterPlaylist(url, text, realFetch) {
     }
     return text;
 }
-
 // Reads back what we served, for the continuity trace only. What we serve is numbered by the
 // ledger below, not by shifting this.
 var SEQ_TAG = '#EXT-X-MEDIA-SEQUENCE:';
-
 function seqRead(text) {
     var at = text.indexOf(SEQ_TAG);
     if (at < 0) { return null; }
@@ -1958,9 +1831,7 @@ function seqRead(text) {
     var value = parseInt(text.substring(at + SEQ_TAG.length, end < 0 ? text.length : end), 10);
     return isNaN(value) ? null : value;
 }
-
 var LIVE_SEQ_TAG = '#EXT-X-TWITCH-LIVE-SEQUENCE:';
-
 // ---- live-sequence ledger -----------------------------------------------------------------
 // EXT-X-TWITCH-LIVE-SEQUENCE is positional -- it numbers the segment that follows -- and it is
 // global to the broadcast, so it survives the session reset a stitched ad causes. Indexing every
@@ -1969,7 +1840,6 @@ var LIVE_SEQ_TAG = '#EXT-X-TWITCH-LIVE-SEQUENCE:';
 //
 // A DISCONTINUITY ends the run the last LIVE-SEQUENCE declared; only a new one restarts it.
 // Carrying the cursor across would number ad segments with the live numbers they displaced.
-
 var PDT_TAG = '#EXT-X-PROGRAM-DATE-TIME:';
 var INF_TAG = '#EXTINF:';
 var MAP_TAG = '#EXT-X-MAP:';
@@ -1981,7 +1851,6 @@ var ENDLIST_TAG = '#EXT-X-ENDLIST';
 // The window Twitch publishes, and a bound on the served one, not a segment count: the
 // cadence is the stream's to choose.
 var WINDOW_SECONDS = 30;
-
 function parsePlaylist(text) {
     var out = { version: null, targetDur: null, ended: false, items: [], ok: false };
     if (typeof text !== 'string' || text.indexOf('#EXTM3U') < 0) { return out; }
@@ -2024,13 +1893,10 @@ function parsePlaylist(text) {
     }
     return out;
 }
-
-
 function newLedger() {
     return { bySeq: {}, hint: {}, dur: {}, first: null, last: null, version: null,
              targetDur: {}, ended: {}, floor: null };
 }
-
 // Every source writes into the same table. Which URL is served is decided in servePlaylist,
 // not by whoever answered first.
 function ledgerAbsorb(ledger, model, source) {
@@ -2078,7 +1944,6 @@ function ledgerAbsorb(ledger, model, source) {
         ledger.ended[source] = ledger.last;
     }
 }
-
 // The longest run ending at the highest number held. A hole below it truncates the run: a short
 // window is recoverable, a window with a hole in it is a stall the player cannot report.
 // Stops at the floor, not at the bottom: in ordinary playback the ledger is contiguous back to
@@ -2091,14 +1956,12 @@ function ledgerTail(ledger) {
     while (lo > floor && ledger.bySeq[lo - 1] !== undefined) { lo--; }
     return { lo: lo, hi: ledger.last };
 }
-
 // Everything below the window we just served will never be asked for again.
 var LEDGER_KEEP = 64;
 // How far the stamped clock is carried over a hole before a source PDT is read instead.
 var PDT_BRIDGE_MAX = 8;
 // The largest forward correction the page's clock is allowed to apply to the carried one.
 var PDT_RESYNC_MAX_MS = 2000;
-
 function ledgerPrune(ledger, lo) {
     var floor = lo - LEDGER_KEEP;
     if (floor <= (ledger.floor === null ? -1 : ledger.floor)) { return; }
@@ -2108,23 +1971,18 @@ function ledgerPrune(ledger, lo) {
     ledger.floor = floor;
     if (ledger.first === null || ledger.first < floor) { ledger.first = floor; }
 }
-
 function newServeState() { return { from: null, pdt: {}, url: {}, hint: {}, top: null }; }
-
 function ledgerDur(ledger, seq) {
     var d = ledger.dur[seq];
     return (typeof d === 'number' && d > 0) ? d : 2;
 }
-
 function isoTime(ms) { return new Date(ms).toISOString().replace(/(\\.\\d{3})\\d*Z$/, '$1Z'); }
-
 // One clock, ours. A live number is stamped once and never restamped: the two sessions label the
 // same content with PDTs seconds apart, so copying makes the timeline jump at every handover and
 // recomputing makes it move under a player that has already read it.
 function mainPdt(e) {
     return (e && e.pdts['main'] !== undefined) ? e.pdts['main'] : null;
 }
-
 // The page's own clock is the reference; a backup's is only better than nothing.
 function anchorPdt(e) {
     if (!e) { return null; }
@@ -2133,7 +1991,6 @@ function anchorPdt(e) {
     for (var k in e.pdts) { return e.pdts[k]; }
     return null;
 }
-
 function stampPdt(ledger, state, lo, hi) {
     for (var s = lo; s <= hi; s++) {
         if (state.pdt[s] !== undefined) { continue; }
@@ -2167,7 +2024,6 @@ function stampPdt(ledger, state, lo, hi) {
         if (!state.top || s > state.top.seq) { state.top = { seq: s, t: t }; }
     }
 }
-
 // Builds the playlist to serve. Returns null when there is not yet enough contiguous content.
 // preferHint is separate from prefer because the two answer to different sources: inside a break
 // Twitch publishes no look-ahead at all, so there the backup is the only one that has any.
@@ -2186,7 +2042,6 @@ function servePlaylist(ledger, state, prefer, preferHint) {
     if (state.from !== null && lo < state.from) { lo = state.from; }
     if (lo > hi) { return null; }
     stampPdt(ledger, state, lo, hi);
-
     var needMap = false, ver = 3, s, e;
     for (s = lo; s <= hi; s++) {
         e = ledger.bySeq[s];
@@ -2194,7 +2049,6 @@ function servePlaylist(ledger, state, prefer, preferHint) {
     }
     if (ledger.version && ledger.version > ver) { ver = ledger.version; }
     if (needMap && ver < 6) { ver = 6; }
-
     var maxDur = 0;
     for (s = lo; s <= hi; s++) { var d = ledgerDur(ledger, s); if (d > maxDur) { maxDur = d; } }
     // The page's session declares it; a backup's is only better than nothing. The segments are a
@@ -2203,7 +2057,6 @@ function servePlaylist(ledger, state, prefer, preferHint) {
     var declared = ledger.targetDur['main'];
     if (declared === undefined) { declared = ledger.targetDur[firstKey(ledger.targetDur)]; }
     var target = Math.max(declared || 0, Math.ceil(maxDur || 2));
-
     var parts = ['#EXTM3U', '#EXT-X-VERSION:' + ver,
                  TARGET_DUR_TAG + target,
                  MEDIA_SEQ_TAG + lo, LIVE_SEQ_TAG + lo];
@@ -2255,7 +2108,6 @@ function servePlaylist(ledger, state, prefer, preferHint) {
         parts.push(ENDLIST_TAG);
     }
     parts.push('');
-
     state.from = lo;
     for (var p in state.pdt) { if (+p < lo - LEDGER_KEEP) { delete state.pdt[p]; delete state.url[p]; } }
     // On its own key, not with the PDTs: a number hinted but never published never gets one.
@@ -2263,14 +2115,11 @@ function servePlaylist(ledger, state, prefer, preferHint) {
     ledgerPrune(ledger, lo);
     return { text: parts.join('\\n'), from: lo, to: hi, used: used };
 }
-
 function firstKey(o) { for (var k in o) { return k; } return null; }
-
 // ---- backup lane --------------------------------------------------------------------------
 // One ledger per rendition the page asks for, fed by two sources: the page's own playlist, and
 // a backup player type polled continuously. Kept warm outside breaks too -- a ledger opened when
 // the ad has already started holds none of the numbers the ad took.
-
 var LANE_HOT_MS = 12000;
 // Covers the whole backup chain on a cold channel: token, usher master, first playlist. With
 // the master warmed above only the last leg is left, so this budget is slack, not a target.
@@ -2283,7 +2132,6 @@ var LANE_REMINT_LIMIT = 2;
 // How long a lane that found nothing stands down. Without it laneFor reopened the whole chain on
 // every media playlist -- a token round-trip per player type, twice a second, logged once.
 var LANE_RETRY_MS = 30000;
-
 function laneFor(stream, url, realFetch) {
     if (!stream.lanes) { stream.lanes = {}; }
     var lane = stream.lanes[url];
@@ -2301,7 +2149,6 @@ function laneFor(stream, url, realFetch) {
     laneOpenBackup(stream, url, lane, realFetch);
     return lane;
 }
-
 // Resolves the backup variant for this rendition, then polls it for as long as the page keeps
 // asking for the rendition. pickVariant enforces the codec family: a playlist the decoder cannot
 // swallow is worse than none.
@@ -2310,7 +2157,6 @@ function laneOpenBackup(stream, url, lane, realFetch) {
     lane.polling = true;
     var types = CONFIG.backupPlayerTypes.slice();
     var want = stream.variants[url] || null;
-
     function attempt() {
         if (!types.length) {
             wlogOnce('lane:' + url, 'warn', 'no backup lane for this rendition -- ads will pass,' +
@@ -2333,7 +2179,6 @@ function laneOpenBackup(stream, url, lane, realFetch) {
             })
             .catch(function () { attempt(); });
     }
-
     // A cached master outlives the session it was minted for: when Twitch rotates that session
     // its playlist answers 404 for good, and a lane that only swallowed the status would poll a
     // dead url once a second while quietly feeding the ledger nothing -- every later break on
@@ -2375,21 +2220,15 @@ function laneOpenBackup(stream, url, lane, realFetch) {
                 return workerSleep(1000).then(poll);
             });
     }
-
     attempt();
 }
-
-
 // MEDIA-SEQUENCE and LIVE-SEQUENCE are served equal, so the gap between them is a constant zero
 // and no walk-back exists any more. The original's own gap is not a target to converge on: it is
 // session-relative against a global number and drifts a segment further apart at every break, so
 // arriving there would tell the player it is minutes behind live.
-
 // A session restart needs no special case: the floor raises the numbering and it carries on. Do
 // not add a detector that serves the original raw -- a variant switch looks identical, and the
 // numbering the player has already read would drop back to the session's own.
-
-
 // -- continuity trace ---------------------------------------------------------------------------
 // What we served, keyed by the url the player will fetch. Bounded: the map lives as long as the
 // tab, and the player never reaches back further than one window.
@@ -2398,7 +2237,6 @@ var tracedSegments = {};
 var tracedOrder = [];
 var traceLastRequest = {};
 var traceSegDur = {};
-
 function traceServed(playlistUrl, servedText) {
     if (!CONFIG.traceContinuity) { return; }
     var seq = seqRead(servedText);
@@ -2424,7 +2262,6 @@ function traceServed(playlistUrl, servedText) {
     if (durN > 0) { traceSegDur[playlistUrl] = durSum / durN; }
     while (tracedOrder.length > TRACE_MAX) { delete tracedSegments[tracedOrder.shift()]; }
 }
-
 // Called on every segment the player actually fetches. The only place in this script that observes
 // the player instead of predicting it.
 function traceRequested(url) {
@@ -2455,7 +2292,6 @@ function traceRequested(url) {
         from: last.n, to: hit.n, delta: gap, where: where,
         wall: Math.round((now - last.at) / 100) / 10 });
 }
-
 function onMediaPlaylist(url, text, realFetch) {
     var stream = streamsByPlaylistUrl[url];
     if (!stream) { return Promise.resolve(text); }
@@ -2470,10 +2306,8 @@ function onMediaPlaylist(url, text, realFetch) {
         self.postMessage({ key: 'StandBackBroken', channel: stream.channel });
     }
     stream.currentVariant = stream.variants[url] || stream.currentVariant;
-
     var lane = laneFor(stream, url, realFetch);
     ledgerAbsorb(lane.ledger, parsePlaylist(text), 'main');
-
     var stitched = hasAdMarkers(text);
     if (!stitched && stream.adActive) {
         stream.adActive = false;
@@ -2483,15 +2317,12 @@ function onMediaPlaylist(url, text, realFetch) {
         self.postMessage({ key: 'AdStarted', channel: stream.channel,
             isMidroll: text.indexOf('"MIDROLL"') >= 0 || text.indexOf('"midroll"') >= 0 });
     }
-
     // Preferring 'main' keeps ordinary playback on the page's own session; the backup only fills
     // the live numbers the ad took away.
     return laneServe(stream, lane, text, stitched, LANE_WAIT_MS);
 }
-
 // How long both sources may be quiet inside a break before it is bridged.
 var LANE_STALL_MS = 4000;
-
 // Both sources can go quiet inside a break -- the backup gone, main carrying nothing but ad
 // segments -- and then the ledger head stops and servePlaylist hands the player the same window
 // until the break ends, which is a dead origin as far as the player can tell. The break's own
@@ -2528,7 +2359,6 @@ function laneBridge(lane, text) {
     lane.srcHead = ledger.last;
     return added;
 }
-
 // Never hand a stitched playlist over: its DATERANGEs light Twitch's own ad UI and its segments
 // are fetched and played. A preroll arrives on an empty ledger by definition, so when there is
 // nothing to serve yet the answer is to wait for the backup, not to pass the original through.
@@ -2547,7 +2377,6 @@ function laneServe(stream, lane, text, stitched, budget) {
                 'no clean source for this break -- bridging it on the original, picture frozen');
         }
     }
-
     // The segments stay on the page's own session; only the look-ahead follows the break, because
     // a hint main published just before the pod names a live number the pod has displaced.
     var out = servePlaylist(lane.ledger, lane.state, 'main', stitched ? 'backup' : 'main');
@@ -2569,7 +2398,6 @@ function laneServe(stream, lane, text, stitched, budget) {
         return laneServe(stream, lane, text, stitched, budget - LANE_WAIT_STEP_MS);
     });
 }
-
 function installFetchHook() {
     var realFetch = self.fetch;
     // Kept outside this closure: the backup lane fetches from the message listener, off the
@@ -2580,15 +2408,12 @@ function installFetchHook() {
             return realFetch.apply(this, arguments);
         }
         var url = input.trimEnd();
-
         if (adSegments.has(url)) {
             return Promise.resolve(emptySegmentResponse());
         }
-
         if (CONFIG.traceContinuity && tracedSegments[url] !== undefined) {
             traceRequested(url);
         }
-
         if (url.indexOf('/channel/hls/') >= 0 && url.indexOf('picture-by-picture') < 0) {
             // parent_domains is how the backend decides the player is embedded, and it is what
             // produces the embed-shaped fake ads.
@@ -2604,7 +2429,6 @@ function installFetchHook() {
                 });
             });
         }
-
         if (url.endsWith('m3u8')) {
             return realFetch(url, options).then(function (response) {
                 if (response.status !== 200) { return response; }
@@ -2613,17 +2437,14 @@ function installFetchHook() {
                     .then(function (out) { traceServed(url, out); return new Response(out, { status: 200 }); });
             });
         }
-
         return realFetch.apply(this, arguments);
     };
 }
-
 var OUR_MESSAGE_KEYS = {
     UpdateDeviceId: 1, UpdateClientVersion: 1, UpdateClientSession: 1,
     UpdateIntegrity: 1, UpdateAuthorization: 1, PlayerReloaded: 1, FetchResponse: 1,
     ChannelChanged: 1, StandBack: 1
 };
-
 // Registered before Twitch's worker is loaded, so this listener runs first and can stop our own
 // messages reaching its onmessage. Its handler assumes every message is one of its own and throws
 // on anything else, which during startup is enough to leave it uninitialised and the player dead.
@@ -2686,7 +2507,6 @@ self.addEventListener('message', function (e) {
         }
     }
 });
-
 // Load Twitch's own worker only after the hook is in place. importScripts is the documented way
 // to do this; the synchronous XHR plus eval below is the fallback for environments that refuse a
 // blob URL here.
@@ -2703,13 +2523,10 @@ function loadTwitchWorker(url) {
     request.send();
     (0, eval)(request.responseText);
 }
-
 installFetchHook();
 `;
-
     function installWorkerHook() {
         const NativeWorker = window.Worker;
-
         class HookedWorker extends NativeWorker {
             constructor(scriptUrl, options) {
                 let isTwitchWorker = false;
@@ -2720,7 +2537,6 @@ installFetchHook();
                     super(scriptUrl, options);
                     return;
                 }
-
                 // Embedded, not posted. See the note at the top of WORKER_SOURCE: a config message
                 // races Twitch's own worker startup and its onmessage throws on anything it did
                 // not send itself.
@@ -2742,14 +2558,12 @@ installFetchHook();
                 const source = 'var VAFT2_INIT = ' + JSON.stringify(init) + ';\n' +
                     WORKER_SOURCE + '\nloadTwitchWorker(' + JSON.stringify(scriptUrl) + ');\n';
                 super(URL.createObjectURL(new Blob([source], { type: 'text/javascript' })), options);
-
                 // A terminated Worker still accepts postMessage without complaining, so there is
                 // no way to ask which of these are dead. Bounded instead: a page runs two at a
                 // time, and every reload leaves another behind for the life of the tab.
                 State.workers.push(this);
                 while (State.workers.length > WORKER_KEEP) { State.workers.shift(); }
                 log('debug', 'wrapped Twitch worker #' + State.workers.length);
-
                 this.addEventListener('message', async (event) => {
                     const data = event.data || {};
                     if (messageIsStale(data)) {
@@ -2839,14 +2653,12 @@ installFetchHook();
                 });
             }
         }
-
         Object.defineProperty(window, 'Worker', {
             configurable: true,
             get() { return HookedWorker; },
             set() { log('debug', 'refused an attempt to replace window.Worker'); }
         });
     }
-
     // Status surface
     // A report that says "ads are getting through" is not actionable. This is.
     window.vaft2 = {
@@ -2934,7 +2746,6 @@ installFetchHook();
             console.log(['[VAFT2] v2 active -- ' + VERSION].concat(names).join('\n'));
         }
     };
-
     // Bootstrap
     // Fetch hook first: the worker bridge calls back through __vaft2RealFetch, so it has to exist
     // before any worker can be wrapped
@@ -2942,7 +2753,6 @@ installFetchHook();
     installWorkerHook();
     applyQualityPreference(Config.PinHighestQuality);
     loadBannerPrefs();
-
     // Whether the tab was already hidden at document-start decides if the one-shot
     // visibilitychange allowance is needed at all.
     try {
@@ -2954,7 +2764,6 @@ installFetchHook();
     // Not in onReady: the first ad request of a session can be issued before DOMContentLoaded, and
     // the retry loop costs nothing while the bundle is still loading.
     startAdManagerDecline();
-
     function onReady() {
         ensurePlayerWired();
         startStallCensus();
@@ -2968,18 +2777,14 @@ installFetchHook();
             setTimeout(rewire, 5000);
         }, 5000);
     }
-
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
         onReady();
     } else {
         window.addEventListener('DOMContentLoaded', onReady);
     }
-
     // Printed straight to the console rather than through log(), so raising LogLevel to warn does
     // not hide the one line that says how to lower it again.
     window.atomicTTV = window.vaft2;
     window.vaft2.help();
-
 })();
-
 })();

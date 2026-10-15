@@ -30,7 +30,10 @@ Wenn dort bereits die alte TwitchAdSolutions-URL steht, ersetze **nur diese URL*
 twitch.tv##+js(twitch-videoad)
 ```
 
-**4. Twitch neu laden – fertig!**
+**4. Ressource aktualisieren und Twitch neu laden**
+
+Beim Update von einer älteren AtomicTTV-Version folge dem kurzen [Ressourcen-Reset](docs/UBLOCK.md#ressource-neu-laden).
+Lade Twitch anschließend vollständig neu. Version **1.0.2** behebt ein uBO-Formatproblem, durch das ältere AtomicTTV-Ressourcen bereits vor dem Start abgeschnitten wurden.
 
 [**Script-URL öffnen**](https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv-ublock-origin.js) · [**Ausführliche Brave-Anleitung & Hilfe**](docs/UBLOCK.md)
 

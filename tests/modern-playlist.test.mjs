@@ -1,8 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { Script } from 'node:vm';
+import { readUblockScriptlet } from '../scripts/lib/ublock-resource.mjs';
 
-const script = readFileSync('atomicttv/atomicttv.user.js', 'utf8');
+for (const [variant, script] of [
+  ['userscript', readFileSync('atomicttv/atomicttv.user.js', 'utf8').replace(/\r\n/g, '\n')],
+  ['uBO-parsed resource', readUblockScriptlet(readFileSync('atomicttv/atomicttv-ublock-origin.js', 'utf8'))],
+]) {
+test.describe(variant, () => {
 // The engine is generated from a template string and runs in a Web Worker. Decode the
 // template literal just as the browser does before extracting real production functions.
 const marker = 'const WORKER_SOURCE = `';
@@ -11,8 +17,11 @@ const templateEnd = script.indexOf('\n`;\n', templateStart);
 assert.ok(templateStart > marker.length - 2 && templateEnd > templateStart,
   'Modern worker template must be present');
 const source = new Function('return ' + script.slice(templateStart, templateEnd + 2))();
+test('complete worker source is valid JavaScript', () => {
+  assert.doesNotThrow(() => new Script(source));
+});
 const start = source.indexOf('var SEQ_TAG =');
-const end = source.indexOf('// ---- backup lane', start);
+const end = source.indexOf('var LANE_HOT_MS =', start);
 assert.ok(start >= 0 && end > start, 'Modern engine ledger must be present');
 
 // Extract trusted production functions to test the real logic without Twitch network access.
@@ -110,3 +119,5 @@ test('prefetch sequence extends the window without duplicating media', () => {
   const served = engine.servePlaylist(ledger, engine.newServeState(), 'main');
   assert.match(served.text, /#EXT-X-TWITCH-PREFETCH:https:\/\/media\.example\/302\.ts/);
 });
+});
+}
