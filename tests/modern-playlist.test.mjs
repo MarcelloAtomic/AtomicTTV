@@ -2,7 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const source = readFileSync('atomicttv/atomicttv.user.js', 'utf8');
+const script = readFileSync('atomicttv/atomicttv.user.js', 'utf8');
+// The engine is generated from a template string and runs in a Web Worker. Decode the
+// template literal just as the browser does before extracting real production functions.
+const marker = 'const WORKER_SOURCE = `';
+const templateStart = script.indexOf(marker) + marker.length - 1;
+const templateEnd = script.indexOf('\n`;\n', templateStart);
+assert.ok(templateStart > marker.length - 2 && templateEnd > templateStart,
+  'Modern worker template must be present');
+const source = new Function('return ' + script.slice(templateStart, templateEnd + 2))();
 const start = source.indexOf('var SEQ_TAG =');
 const end = source.indexOf('// ---- backup lane', start);
 assert.ok(start >= 0 && end > start, 'Modern engine ledger must be present');
