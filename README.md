@@ -1,45 +1,45 @@
 # AtomicTTV
 
-**Twitch-Werbeblocker für uBlock Origin – ohne Tampermonkey.**
+**Twitch-Werbeblocker für Brave mit uBlock Origin – ohne Tampermonkey.**
 
-AtomicTTV versucht, Werbung in Twitch-Livestreams mit alternativen Videosegmenten zu umgehen. Die Wiedergabe soll dabei möglichst stabil bleiben.
+AtomicTTV versucht, Werbung in Twitch-Livestreams über alternative Videosegmente zu umgehen.
 
-## Installation
+## Installation in Brave
 
-Du brauchst das **vollständige uBlock Origin** (am einfachsten mit Firefox). **uBlock Origin Lite funktioniert nicht.**
+**1. uBlock Origin aktivieren**
 
-**1. Script-URL eintragen**
+Öffne in Brave `brave://settings/extensions/v2` und installiere bzw. aktiviere **uBlock Origin**. Falls es schon installiert ist, überspringe diesen Schritt. **Nicht uBlock Origin Lite verwenden.**
 
-Öffne **uBlock Origin → Dashboard → Einstellungen**. Aktiviere **„Ich bin ein erfahrener Anwender“** und öffne das **Zahnrad** daneben.
+**2. AtomicTTV-URL eintragen**
 
-Suche `userResourcesLocation` und trage diese Zeile ein:
+Öffne das **uBlock-Origin-Dashboard → Einstellungen**. Aktiviere **„Ich bin ein erfahrener Anwender“** und klicke auf das **Zahnrad** daneben.
+
+Suche `userResourcesLocation` und trage Folgendes ein:
 
 ```text
 userResourcesLocation https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv-ublock-origin.js
 ```
 
-Falls dort noch die alte URL von `pixeltris/TwitchAdSolutions` steht, **ersetze sie**.
+Wenn dort bereits die alte TwitchAdSolutions-URL steht, ersetze **nur diese URL**. Andere, unabhängig genutzte URLs kannst du behalten. Speichere die Änderung.
 
-**2. Filter hinzufügen**
+**3. Filter hinzufügen**
 
-Öffne **Meine Filter** und füge diese Zeile hinzu:
+Öffne **Meine Filter**, füge die Zeile hinzu und klicke auf **Änderungen übernehmen**:
 
 ```text
 twitch.tv##+js(twitch-videoad)
 ```
 
-**3. Fertig**
+**4. Twitch neu laden – fertig!**
 
-Speichere die erweiterten Einstellungen, klicke bei **Meine Filter** auf **Änderungen übernehmen** und lade Twitch neu.
+[**Script-URL öffnen**](https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv-ublock-origin.js) · [**Ausführliche Brave-Anleitung & Hilfe**](docs/UBLOCK.md)
 
-**[Script-URL direkt öffnen](https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv-ublock-origin.js)** · [Kurze Anleitung und Fehlerbehebung](docs/UBLOCK.md)
-
-> **Wichtig:** Nicht gleichzeitig das alte TwitchAdSolutions-Scriptlet oder andere Twitch-Adblocker verwenden. AtomicTTV ist experimentell; Twitch-Änderungen können die Funktion beeinträchtigen. Automatische Tests ersetzen keinen Live-Test.
+> **Hinweis:** Benutze nicht gleichzeitig andere Twitch-spezifische Adblock-Scriptlets. AtomicTTV ist experimentell; Twitch-Änderungen können die Funktion beeinträchtigen. Automatische Tests ersetzen keine Live-Überprüfung.
 
 ## Weitere Informationen
 
-- [Alternative Installation (Browser-Erweiterung oder Userscript)](docs/INSTALL.md)
+- [Andere Installationsmöglichkeiten](docs/INSTALL.md)
 - [Quellcode](atomicttv/) · [Entwicklung & Tests](docs/ROADMAP.md)
-- [MIT-Lizenz](LICENSE) · [Drittanbieter-Credits](THIRD_PARTY_NOTICES.md)
+- [MIT-Lizenz](LICENSE) · [Credits](THIRD_PARTY_NOTICES.md)
 
 Basierend auf [TwitchAdSolutions](https://github.com/pixeltris/TwitchAdSolutions) und [TwitchAdBlock](https://github.com/scamorza/TwitchAdBlock). Nicht mit Twitch verbunden.
