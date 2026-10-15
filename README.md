@@ -1,81 +1,45 @@
 # AtomicTTV
 
-**Twitch-Userscript und Chrome-/Edge-/Brave-Erweiterung (Manifest V3).** Modernisierte Weiterentwicklung des [archivierten TwitchAdSolutions-Projekts](https://github.com/pixeltris/TwitchAdSolutions) auf Basis des [TwitchAdBlock-VAFT-Nachfolgers](https://github.com/scamorza/TwitchAdBlock).
+**Twitch-Werbeblocker für uBlock Origin – ohne Tampermonkey.**
 
-**Version:** 1.0.0 · **Projektstand:** Technisch installierbar und automatisiert getestet; keine unabhängige Garantie für aktuelle Werbeblockierung oder fehlerfreie Twitch-Live-Wiedergabe. Twitch kann interne Schnittstellen jederzeit ändern.
+AtomicTTV versucht, Werbung in Twitch-Livestreams mit alternativen Videosegmenten zu umgehen. Die Wiedergabe soll dabei möglichst stabil bleiben.
 
-## uBlock Origin (ohne Tampermonkey)
+## Installation
 
-Wer wie beim Originalprojekt den `userResourcesLocation`-Eintrag nutzt, kann den **modernen** AtomicTTV-Kern direkt als `twitch-videoad`-Scriptlet laden:
+Du brauchst das **vollständige uBlock Origin** (am einfachsten mit Firefox). **uBlock Origin Lite funktioniert nicht.**
+
+**1. Script-URL eintragen**
+
+Öffne **uBlock Origin → Dashboard → Einstellungen**. Aktiviere **„Ich bin ein erfahrener Anwender“** und öffne das **Zahnrad** daneben.
+
+Suche `userResourcesLocation` und trage diese Zeile ein:
 
 ```text
-https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv-ublock-origin.js
+userResourcesLocation https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv-ublock-origin.js
 ```
 
-In **Meine Filter** bleibt die Regel `twitch.tv##+js(twitch-videoad)` bestehen. Ersetze in den erweiterten uBlock-Origin-Einstellungen den alten pixeltris-URL durch unseren neuen. Weitere Schritte stehen in [docs/UBLOCK.md](docs/UBLOCK.md).
+Falls dort noch die alte URL von `pixeltris/TwitchAdSolutions` steht, **ersetze sie**.
 
-**Vollständiges uBlock Origin erforderlich** (nicht uBlock Origin Lite). Der ältere Fork-Pfad `vaft/vaft-ublock-origin.js` bleibt als Legacy-Ausgabe erhalten.
+**2. Filter hinzufügen**
 
-## Direkt installieren
+Öffne **Meine Filter** und füge diese Zeile hinzu:
 
-### Variante A – Userscript (empfohlen)
-
-1. [Violentmonkey](https://violentmonkey.github.io/) oder [Tampermonkey](https://www.tampermonkey.net/) installieren.
-2. **[AtomicTTV v1.0.0 installieren](https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv.user.js)** – der Userscript-Manager zeigt die Installationsabfrage.
-3. Andere Twitch-spezifische Blocker deaktivieren, Twitch neu laden.
-4. Optional in der Browser-Konsole mit `window.atomicTTV.status()` prüfen.
-
-### Variante B – Chrome, Edge oder Brave als Erweiterung
-
-Aus dem GitHub-Repository unter **Actions → Quality checks → aktueller erfolgreicher Lauf → Artifacts** das Paket **AtomicTTV-Chromium-1.0.0** herunterladen (GitHub-Login kann notwendig sein). Das ZIP enthält ein weiteres ZIP mit dem installierbaren Erweiterungsordner; den inneren Inhalt entpacken. Dann im Browser `chrome://extensions` bzw. `edge://extensions` öffnen, Entwicklermodus aktivieren, **Entpackte Erweiterung laden** auswählen und den Ordner mit `manifest.json` laden.
-
-Alternativ den Repository-Quellcode als ZIP herunterladen und den Repository-Ordner direkt als entpackte Erweiterung laden. Die Erweiterung benötigt keine breit gefassten Zusatzberechtigungen und injiziert den Code nur auf Twitch-Seiten.
-
-**Wichtig:** Nur **eine** AtomicTTV-Variante gleichzeitig verwenden: uBO-Scriptlet, Userscript oder Erweiterung.
-
-[Ausführliche Installations- und Fehlerdiagnoseanleitung](docs/INSTALL.md)
-
-## Was AtomicTTV macht
-
-- Erkennt in HLS-Playlists eingebettete Werbeabschnitte und versucht, deren Lücken mit einem anderen Stream auszugleichen.
-- Verwendet einen sendungsweiten **Live-Sequence-Ledger**: Streams verschiedener Sitzungen werden nach Content-Segmenten statt nur nach sessionabhängigen Media-Sequences synchronisiert.
-- Prüft Fallback-Player-Typen in Reihenfolge: `mobile_feed`, `popout`, `autoplay`.
-- Unterstützt bei verfügbaren Twitch-Renditions auch höher aufgelöste Streams (AVC/HEVC); nicht jede Fallback-Variante hat dieselbe Qualität.
-- Hat Wiederherstellungsroutinen für hängende Player, Dekodierfehler und störende Hintergrundtab-Effekte.
-- Verfügt über Client-seitige Display-Ad-Behandlung und Diagnosefunktionen.
-
-**Grenzen:** Es können weiterhin Ladepausen, schwarze Bilder oder Qualitätswechsel auftreten. Verfügbare Streamqualität und Wirksamkeit sind von Twitch abhängig; keine mobile App-Unterstützung. Bei abweichenden Twitch-Experimenten ist ein Hotfix möglichweise nötig.
-
-## Diagnose
-
-Öffne Twitch, drücke `F12` und teste:
-
-```js
-window.atomicTTV.status()            // Installationszustand und Player-Erkennung
-window.atomicTTV.setLogLevel('debug') // Erweiterte Diagnosen
-window.atomicTTV.overlayBuffer()      // Beobachtungen zu Overlay-Werbung
-window.atomicTTV.banner({ShowBanner:false}) // Statusmarkierung ausblenden
+```text
+twitch.tv##+js(twitch-videoad)
 ```
 
-**Keine** Cookies, Authentifizierungsheader, signierten Stream-URLs oder Playback-Tokens in Issues hochladen.
+**3. Fertig**
 
-## Entwicklung und Tests
+Speichere die erweiterten Einstellungen, klicke bei **Meine Filter** auf **Änderungen übernehmen** und lade Twitch neu.
 
-Node.js **20.11+**:
+**[Script-URL direkt öffnen](https://raw.githubusercontent.com/MarcelloAtomic/AtomicTTV/master/atomicttv/atomicttv-ublock-origin.js)** · [Kurze Anleitung und Fehlerbehebung](docs/UBLOCK.md)
 
-```bash
-npm run check              # Syntax- und HLS-Regressionsprüfungen
-npm run package:extension  # lokale Chromium-Erweiterung erzeugen
-npm run verify             # alles zusammen
-```
+> **Wichtig:** Nicht gleichzeitig das alte TwitchAdSolutions-Scriptlet oder andere Twitch-Adblocker verwenden. AtomicTTV ist experimentell; Twitch-Änderungen können die Funktion beeinträchtigen. Automatische Tests ersetzen keinen Live-Test.
 
-Die Tests führen die Originalfunktionen aus dem eingebetteten Stream-Worker mit synthetischen HLS-Playlists aus. Zusätzlich werden Installationsmetadaten, Legacy-VAFT-Bestand und die Erweiterung geprüft. Diese Tests ersetzen **keine** Live-Validierung von Twitch-Streams mit Werbeunterbrechungen.
+## Weitere Informationen
 
-## Code und Herkunft
+- [Alternative Installation (Browser-Erweiterung oder Userscript)](docs/INSTALL.md)
+- [Quellcode](atomicttv/) · [Entwicklung & Tests](docs/ROADMAP.md)
+- [MIT-Lizenz](LICENSE) · [Drittanbieter-Credits](THIRD_PARTY_NOTICES.md)
 
-- Hauptprodukt: [atomicttv/atomicttv.user.js](atomicttv/atomicttv.user.js)
-- Erweiterungsmanifest: [manifest.json](manifest.json)
-- Historische, **nicht als aktuelle Primärlösung empfohlene** Varianten: [vaft](vaft/), [video-swap-new](video-swap-new/), [strip](strip/)
-- [Roadmap](docs/ROADMAP.md) · [Mitmachen](CONTRIBUTING.md) · [Drittanbieter-Credits](THIRD_PARTY_NOTICES.md)
-
-**MIT-Lizenz.** Copyright und Autorenangaben beider Vorgängerprojekte bleiben erhalten. Twitch unterstützt dieses Projekt nicht; der Einsatz kann gegen Twitch-Nutzungsbedingungen verstoßen. Alternativ bietet [Twitch Turbo](https://www.twitch.tv/turbo) einen offiziellen Weg ohne Werbung.
+Basierend auf [TwitchAdSolutions](https://github.com/pixeltris/TwitchAdSolutions) und [TwitchAdBlock](https://github.com/scamorza/TwitchAdBlock). Nicht mit Twitch verbunden.
